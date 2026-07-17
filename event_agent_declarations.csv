@@ -1,0 +1,154 @@
+msa,declaration_id,event_type,impact_magnitude,confidence,reasoning,raw_impact_magnitude,gated
+Phoenix,FM-5389-AZ,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Phoenix,FM-5385-AZ,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Phoenix,FM-5313-AZ,disaster,-0.5,0.7,"The bush fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Phoenix,FM-5315-AZ,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Phoenix,FM-5311-AZ,disaster,-0.5,0.7,"The fire likely disrupted local market transactions due to damage and emergency response efforts, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Phoenix,DR-4524-AZ,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and the local market's ability to list homes, leading to a decrease in for-sale inventory.",-0.75,False
+Phoenix,EM-3442-AZ,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Phoenix,FM-5585-AZ,disaster,-0.5,0.7,"The fire likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.5,False
+Phoenix,FM-5501-AZ,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Riverside,FM-5451-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Los Angeles,FM-5439-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Riverside,FM-5325-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Riverside,FM-5301-CA,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Riverside,FM-5300-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Los Angeles,FM-5297-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Los Angeles,FM-5296-CA,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Los Angeles,FM-5293-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Riverside,FM-5268-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Riverside,FM-5260-CA,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Riverside,FM-5350-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Los Angeles,DR-4569-CA,disaster,-0.75,0.9,"The wildfires likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.75,False
+Riverside,DR-4569-CA,disaster,-0.75,0.9,"The wildfires likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.75,False
+San Francisco,DR-4558-CA,disaster,-0.75,0.9,"The wildfires likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.75,False
+Los Angeles,EM-3646-CA,disaster,0.0,0.4,"The chemical release likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
+San Francisco,DR-4482-CA,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and market activity, leading to a decrease in for-sale inventory as sellers may have pulled listings and transactions were halted.",-0.75,False
+Los Angeles,DR-4482-CA,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Riverside,DR-4482-CA,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the local market's ability to list homes, leading to a decrease in for-sale inventory.",-0.75,False
+Los Angeles,DR-4407-CA,disaster,-0.75,0.9,"The wildfires likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.75,False
+San Francisco,EM-3428-CA,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Los Angeles,EM-3428-CA,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Riverside,EM-3428-CA,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Riverside,EM-3415-CA,disaster,0.0,0.6,"The earthquake likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Los Angeles,EM-3409-CA,disaster,0.0,0.6,"The wildfires likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Los Angeles,FM-5548-CA,disaster,-0.5,0.7,"The fire likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Riverside,FM-5538-CA,disaster,0.0,0.6,"The airport fire likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.5,True
+Los Angeles,FM-5537-CA,disaster,-0.5,0.7,"The fire likely disrupted local market operations, leading to a decrease in the ability to list homes for sale due to damage and potential evacuations.",-0.5,False
+Riverside,FM-5537-CA,disaster,-0.5,0.7,"The fire likely disrupted local market operations, leading to a decrease in the ability to list homes for sale due to damage and potential evacuations.",-0.5,False
+Riverside,FM-5535-CA,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and potential evacuations, leading to a decrease in inventory.",-0.5,False
+Los Angeles,DR-4856-CA,disaster,-0.75,0.9,"The wildfires and straight-line winds likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.75,False
+Los Angeles,DR-4769-CA,disaster,-0.5,0.7,"The severe winter storms and associated disasters likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Riverside,DR-4750-CA,disaster,-0.5,0.8,"The tropical storm likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+San Francisco,DR-4699-CA,disaster,-0.5,0.8,"The severe winter storms and associated events likely disrupted the local market's ability to list or close on homes due to damage and infrastructure issues, leading to a decrease in for-sale inventory.",-0.5,False
+Los Angeles,DR-4699-CA,disaster,-0.5,0.7,"The severe winter storms and associated events likely disrupted the local market's ability to list or close on homes, leading to a decrease in inventory.",-0.5,False
+Riverside,DR-4699-CA,disaster,-0.75,0.9,"The severe winter storms and associated events likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.75,False
+Los Angeles,DR-4683-CA,disaster,-0.5,0.8,"The severe winter storms and flooding likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+San Francisco,DR-4683-CA,disaster,-0.5,0.7,"The severe winter storms and flooding likely disrupted the local market's ability to list or close on homes due to damaged infrastructure and halted transactions, indicating a decrease in inventory.",-0.5,False
+Los Angeles,EM-3592-CA,disaster,0.0,0.6,"The severe winter storms and flooding likely disrupted local market transactions, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Riverside,EM-3592-CA,disaster,0.0,0.6,"The severe winter storms and flooding likely disrupted local market transactions, leading to a decrease in the ability to list homes for sale.",-0.3,True
+San Francisco,EM-3592-CA,disaster,0.0,0.6,"The severe winter storms and associated flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+San Francisco,EM-3591-CA,disaster,0.0,0.6,"The severe winter storms and flooding likely disrupted the local market's ability to list or close on homes due to damaged infrastructure and halted transactions, leading to a decrease in inventory.",-0.3,True
+Los Angeles,EM-3591-CA,disaster,0.0,0.6,"The severe winter storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Riverside,EM-3591-CA,disaster,0.0,0.6,"The severe winter storms and flooding likely disrupted local market transactions, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Philadelphia,DR-4627-DE,disaster,-0.5,0.8,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Philadelphia,DR-4526-DE,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and market activity, leading to a decrease in the ability to list homes for sale, which aligns with mechanism 1.",-0.75,False
+Philadelphia,EM-3449-DE,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Washington DC,DR-4502-DC,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Washington DC,EM-3447-DC,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Washington DC,EM-3553-DC,zoning_change,0.0,0.6,"The event is related to a presidential inauguration, which may lead to temporary changes in local zoning or regulations, but it is unlikely to significantly disrupt housing inventory. The activated Public Assistance program suggests some level of impact, but the overall effect on for-sale inventory is expected to be minimal.",0.3,True
+Washington DC,EM-3643-DC,disaster,0.0,0.6,"The sewer line collapse likely disrupts local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
+Miami,DR-4680-FL,disaster,-0.5,0.7,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Miami,DR-4673-FL,disaster,-0.5,0.8,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Miami,DR-4486-FL,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Miami,DR-4468-FL,disaster,-0.5,0.8,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Miami,EM-3419-FL,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Miami,EM-3587-FL,disaster,0.0,0.6,"The tropical storm likely disrupted local market operations, leading to a decrease in the ability to list homes for sale, which aligns with mechanism 1.",-0.3,True
+Miami,EM-3584-FL,disaster,0.0,0.6,"The emergency declaration indicates some disruption due to Tropical Storm Ian, which likely hindered transactions and listings in the local housing market, leading to a decrease in inventory.",-0.3,True
+Miami,EM-3560-FL,disaster,-0.5,0.7,"The building collapse likely disrupted transactions and access to properties in the area, leading to a decrease in for-sale inventory.",-0.5,False
+Miami,EM-3533-FL,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.3,True
+Miami,EM-3432-FL,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Miami,EM-3622-FL,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Miami,DR-4834-FL,disaster,-0.5,0.8,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Atlanta,EM-3642-GA,disaster,0.0,0.6,"The severe winter storm likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
+Atlanta,DR-4501-GA,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Atlanta,EM-3464-GA,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Atlanta,EM-3616-GA,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Atlanta,EM-3406-GA,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.3,True
+Atlanta,DR-4830-GA,disaster,-0.5,0.8,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Chicago,DR-4489-IL,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and market activity, leading to a decrease in the ability to list homes for sale, which aligns with mechanism 1.",-0.75,False
+Chicago,EM-3435-IL,disaster,0.0,0.6,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Chicago,DR-4819-IL,disaster,-0.5,0.8,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Chicago,DR-4728-IL,disaster,-0.5,0.8,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Chicago,DR-4515-IN,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Chicago,EM-3641-IN,disaster,0.0,0.4,"The severe winter storm likely disrupted transactions and access to homes, leading to a decrease in for-sale inventory.",-0.3,True
+Chicago,EM-3456-IN,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Chicago,DR-4363-IN,disaster,-0.5,0.8,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Chicago,DR-4704-IN,disaster,-0.5,0.8,"The severe storms and tornadoes likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Philadelphia,DR-4491-MD,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Washington DC,DR-4491-MD,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Washington DC,DR-4374-MD,disaster,-0.5,0.8,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Philadelphia,EM-3430-MD,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Washington DC,EM-3430-MD,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Philadelphia,EM-3634-MD,disaster,0.0,0.6,"The severe winter storm likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
+Washington DC,EM-3634-MD,disaster,0.0,0.6,"The severe winter storm likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
+Boston,DR-4651-MA,disaster,-0.5,0.7,"The severe winter storm likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.5,False
+Boston,DR-4496-MA,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Boston,DR-4372-MA,disaster,-0.5,0.7,"The severe winter storm and flooding likely disrupted the local market's ability to list or close on homes due to damaged infrastructure and halted transactions, leading to a decrease in for-sale inventory.",-0.5,False
+Boston,EM-3599-MA,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Boston,EM-3438-MA,disaster,0.0,0.6,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Detroit,DR-4607-MI,disaster,-0.5,0.8,"The severe storms, flooding, and tornadoes likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Detroit,DR-4494-MI,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes due to lockdowns and economic uncertainty, leading to a decrease in for-sale inventory.",-0.75,False
+Detroit,EM-3455-MI,disaster,0.0,0.6,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Detroit,DR-4757-MI,disaster,-0.5,0.8,"The severe storms, tornadoes, and flooding likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Boston,DR-4516-NH,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale due to health concerns and economic uncertainty, leading to a decrease in inventory.",-0.75,False
+Boston,DR-4370-NH,disaster,-0.5,0.7,"The severe storm and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Boston,EM-3445-NH,disaster,0.0,0.6,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Boston,DR-4771-NH,disaster,-0.5,0.7,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Boston,DR-4740-NH,disaster,-0.5,0.7,"The severe storms and flooding likely disrupted the local market's ability to list or close on homes due to damaged infrastructure and halted transactions, leading to a decrease in for-sale inventory.",-0.5,False
+New York,DR-4488-NJ,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and the local market's ability to list homes, leading to a decrease in for-sale inventory.",-0.75,False
+Philadelphia,DR-4488-NJ,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+New York,EM-3451-NJ,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Philadelphia,EM-3451-NJ,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+New York,DR-4694-NY,disaster,-0.5,0.7,"The severe winter storm likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+New York,DR-4480-NY,disaster,-0.75,0.9,"The COVID-19 pandemic disrupted transactions and market activity, leading to a decrease in the ability to list homes for sale, which aligns with mechanism 1.",-0.75,False
+New York,EM-3565-NY,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+New York,EM-3434-NY,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the local market's ability to list homes, leading to a decrease in for-sale inventory.",-0.3,True
+New York,DR-4755-NY,disaster,-0.5,0.8,"The severe storm and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Philadelphia,DR-4618-PA,disaster,-0.75,0.9,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.75,False
+Philadelphia,DR-4506-PA,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Philadelphia,EM-3441-PA,disaster,0.0,0.6,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Houston,FM-5573-TX,disaster,-0.5,0.7,"The fire likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.5,False
+Houston,DR-4798-TX,disaster,-0.75,0.9,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.75,False
+Dallas,DR-4781-TX,disaster,-0.5,0.8,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Houston,DR-4781-TX,disaster,-0.75,0.9,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.75,False
+Houston,DR-4586-TX,disaster,-0.75,0.9,"The severe winter storms likely disrupted transactions due to infrastructure damage and access issues, leading to a decrease in the ability to list homes for sale.",-0.75,False
+Dallas,DR-4586-TX,disaster,-0.75,0.9,"The severe winter storms likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.75,False
+Houston,DR-4485-TX,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes due to lockdowns and economic uncertainty, leading to a decrease in for-sale inventory.",-0.75,False
+Dallas,DR-4485-TX,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Houston,DR-4466-TX,disaster,-0.5,0.8,"The tropical storm likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Houston,EM-3554-TX,disaster,0.0,0.6,"The severe winter storm likely disrupted transactions due to infrastructure damage and access issues, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Dallas,EM-3554-TX,disaster,0.0,0.6,"The severe winter storm likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
+Houston,EM-3530-TX,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.3,True
+Houston,EM-3458-TX,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Dallas,EM-3458-TX,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Washington DC,DR-4512-VA,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Washington DC,DR-4411-VA,disaster,-0.5,0.7,"The tropical storm likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.5,False
+Washington DC,EM-3448-VA,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Washington DC,EM-3403-VA,disaster,0.0,0.6,"The hurricane likely disrupted transactions and access to properties, leading to a decrease in for-sale inventory.",-0.3,True
+Washington DC,EM-3631-VA,disaster,0.0,0.4,"The severe winter storm likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
+Seattle,FM-5455-WA,disaster,-0.5,0.7,"The fire likely disrupted the local market's ability to list or close on homes due to damage and evacuation, leading to a decrease in inventory.",-0.5,False
+Seattle,FM-5360-WA,disaster,-0.5,0.7,"The fire likely disrupted local market activities, leading to a decrease in the ability to list or close on homes due to damage and potential evacuations.",-0.5,False
+Seattle,DR-4775-WA,disaster,-0.5,0.8,"The severe winter storms and associated events likely disrupted the local market's ability to list or close on homes due to damaged infrastructure and hazardous conditions, leading to a decrease in inventory.",-0.5,False
+Seattle,EM-3629-WA,disaster,0.0,0.6,"The severe storms and flooding likely disrupted the local market's ability to list or close on homes, leading to a decrease in inventory.",-0.3,True
+Seattle,DR-4593-WA,disaster,0.0,0.6,"The severe winter storm likely disrupted transactions and access to properties due to flooding and landslides, leading to a decrease in for-sale inventory.",-0.3,True
+Seattle,DR-4539-WA,disaster,-0.5,0.8,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Seattle,DR-4481-WA,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale due to lockdowns and market uncertainty, leading to a decrease in inventory.",-0.75,False
+Seattle,DR-4418-WA,disaster,-0.5,0.7,"The severe winter storms and associated events likely disrupted the local market's ability to list or close on homes, leading to a decrease in inventory.",-0.5,False
+Seattle,EM-3427-WA,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Seattle,DR-4682-WA,disaster,-0.5,0.8,"The severe winter storm likely disrupted transactions due to damaged infrastructure and hazardous conditions, leading to a decrease in the ability to list or close on homes.",-0.5,False
+Seattle,DR-4906-WA,disaster,-0.5,0.8,"The severe storms and associated flooding likely disrupted the local market's ability to list or close on homes, leading to a decrease in for-sale inventory.",-0.5,False
+Washington DC,DR-4517-WV,disaster,-0.75,0.9,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.75,False
+Washington DC,DR-4378-WV,disaster,-0.5,0.8,"The severe storms and flooding likely disrupted transactions and access to properties, leading to a decrease in the ability to list homes for sale.",-0.5,False
+Washington DC,EM-3450-WV,disaster,0.0,0.4,"The COVID-19 pandemic likely disrupted transactions and the ability to list homes for sale, leading to a decrease in inventory.",-0.3,True
+Washington DC,EM-3639-WV,disaster,0.0,0.6,"The severe winter storm likely disrupted local market operations, leading to a decrease in the ability to list or close on homes, which aligns with mechanism 1.",-0.3,True
