@@ -3,15 +3,15 @@ Backtest Harness — FACTS-MAS Phase 2.
 
 6-fold expanding-window backtest per evaluation_protocol.md.
 
-Fold table (from evaluation_protocol.md):
+Fold table (synced with fold_boundaries.py, Jan 2026 cutoff):
     | Fold | Train start | Train end  | Test start | Test end   |
     |------|-------------|------------|------------|------------|
-    | 1    | 2019-02-02  | 2021-01-23 | 2021-05-01 | 2021-09-11 |
-    | 2    | 2019-02-02  | 2021-09-11 | 2021-12-18 | 2022-04-30 |
-    | 3    | 2019-02-02  | 2022-04-30 | 2022-08-06 | 2022-12-17 |
-    | 4    | 2019-02-02  | 2022-12-17 | 2023-03-25 | 2023-08-05 |
-    | 5    | 2019-02-02  | 2023-08-05 | 2023-11-11 | 2024-03-23 |
-    | 6    | 2019-02-02  | 2024-03-23 | 2024-06-29 | 2024-11-09 |
+    | 1    | 2019-02-02  | 2021-01-23 | 2021-05-01 | 2021-11-13 |
+    | 2    | 2019-02-02  | 2021-11-13 | 2022-02-19 | 2022-09-03 |
+    | 3    | 2019-02-02  | 2022-09-03 | 2022-12-10 | 2023-06-24 |
+    | 4    | 2019-02-02  | 2023-06-24 | 2023-09-30 | 2024-04-13 |
+    | 5    | 2019-02-02  | 2024-04-13 | 2024-07-20 | 2025-02-01 |
+    | 6    | 2019-02-02  | 2025-02-01 | 2025-05-10 | 2025-11-22 |
 
 Key constraints:
     - 13-week embargo between train_end and test_start per fold.
@@ -48,17 +48,17 @@ class FoldSpec:
 
 FOLDS = [
     FoldSpec(1, datetime.date(2019, 2, 2), datetime.date(2021, 1, 23),
-             datetime.date(2021, 5, 1), datetime.date(2021, 9, 11)),
-    FoldSpec(2, datetime.date(2019, 2, 2), datetime.date(2021, 9, 11),
-             datetime.date(2021, 12, 18), datetime.date(2022, 4, 30)),
-    FoldSpec(3, datetime.date(2019, 2, 2), datetime.date(2022, 4, 30),
-             datetime.date(2022, 8, 6), datetime.date(2022, 12, 17)),
-    FoldSpec(4, datetime.date(2019, 2, 2), datetime.date(2022, 12, 17),
-             datetime.date(2023, 3, 25), datetime.date(2023, 8, 5)),
-    FoldSpec(5, datetime.date(2019, 2, 2), datetime.date(2023, 8, 5),
-             datetime.date(2023, 11, 11), datetime.date(2024, 3, 23)),
-    FoldSpec(6, datetime.date(2019, 2, 2), datetime.date(2024, 3, 23),
-             datetime.date(2024, 6, 29), datetime.date(2024, 11, 9)),
+             datetime.date(2021, 5, 1), datetime.date(2021, 11, 13)),
+    FoldSpec(2, datetime.date(2019, 2, 2), datetime.date(2021, 11, 13),
+             datetime.date(2022, 2, 19), datetime.date(2022, 9, 3)),
+    FoldSpec(3, datetime.date(2019, 2, 2), datetime.date(2022, 9, 3),
+             datetime.date(2022, 12, 10), datetime.date(2023, 6, 24)),
+    FoldSpec(4, datetime.date(2019, 2, 2), datetime.date(2023, 6, 24),
+             datetime.date(2023, 9, 30), datetime.date(2024, 4, 13)),
+    FoldSpec(5, datetime.date(2019, 2, 2), datetime.date(2024, 4, 13),
+             datetime.date(2024, 7, 20), datetime.date(2025, 2, 1)),
+    FoldSpec(6, datetime.date(2019, 2, 2), datetime.date(2025, 2, 1),
+             datetime.date(2025, 5, 10), datetime.date(2025, 11, 22)),
 ]
 
 HORIZONS = [4, 8, 13]

@@ -1,15 +1,21 @@
 """
 Intrinsic Agent — FACTS-MAS Phase 2.
 
-Regression/GBM model using Census/NOAA static features (population, income,
+Regularised linear model using Census/NOAA static features (population, income,
 housing units, density, hazard_index) from intrinsic_static.csv.
 
 Design:
     - Learns how static MSA characteristics relate to inventory levels.
-    - Uses a GradientBoostingRegressor (scikit-learn) trained on historical
-      inventory averages per MSA.
+    - Uses StandardScaler + Ridge regression (scikit-learn) to prevent
+      overfitting on the small 15-MSA dataset.
     - Validation uses held-out MSAs (leave-one-out) to check the model isn't
       just memorizing city identity.
+
+History:
+    - v1 used GradientBoostingRegressor — overfitted badly (0.1% train,
+      48-52% leave-one-out error) because 100-tree GBM memorises 15 samples.
+    - v2 (current) uses Ridge with L2 regularisation + feature scaling,
+      forcing the model to learn general demographic relationships.
 
 Validation (from PDF §3):
     - Unit test: output shape and range checks.
@@ -19,11 +25,13 @@ Validation (from PDF §3):
 from __future__ import annotations
 
 import datetime
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.linear_model import Ridge
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 from facts_mas.schema import AgentOutput
 
@@ -42,7 +50,7 @@ INTRINSIC_FEATURES = [
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Model training — deterministic (fixed random_state)
+# Model training — deterministic, regularised
 # ═══════════════════════════════════════════════════════════════════════════
 
 def train_intrinsic_model(
@@ -51,13 +59,18 @@ def train_intrinsic_model(
     train_end: datetime.date,
     *,
     exclude_msa: Optional[str] = None,
-) -> GradientBoostingRegressor:
+) -> Pipeline:
     """
-    Train a GBM that predicts average inventory level from static MSA features.
+    Train a Ridge regression pipeline that predicts average inventory level
+    from static MSA features.
 
     The target variable is the average weekly inventory_count per MSA
     over the training period. This gives the model a structural "expected
     level" for each city based on its demographics and hazard exposure.
+
+    StandardScaler is essential because population (~millions) and
+    hazard_index (~0-10) live on vastly different scales; without it
+    Ridge penalises all coefficients equally by magnitude, not importance.
 
     Args:
         weekly_df: aligned_weekly.csv with 'date' column as datetime.
@@ -66,7 +79,7 @@ def train_intrinsic_model(
         exclude_msa: If set, hold out this MSA for validation (leave-one-out).
 
     Returns:
-        Trained GradientBoostingRegressor.
+        Trained sklearn Pipeline (StandardScaler → Ridge).
     """
     # Compute average inventory per MSA over training period
     train_data = weekly_df[weekly_df["date"] <= pd.Timestamp(train_end)]
@@ -91,12 +104,10 @@ def train_intrinsic_model(
     X = merged[INTRINSIC_FEATURES].values
     y = merged["avg_inventory"].values
 
-    model = GradientBoostingRegressor(
-        n_estimators=100,
-        max_depth=3,
-        learning_rate=0.1,
-        random_state=42,  # deterministic
-    )
+    model = Pipeline([
+        ("scaler", StandardScaler()),
+        ("ridge", Ridge(alpha=1.0)),  # L2 regularisation, deterministic
+    ])
     model.fit(X, y)
 
     return model
@@ -113,7 +124,7 @@ def run_intrinsic_agent(
     forecast_origin: datetime.date,
     horizon_weeks: int,
     *,
-    model: Optional[GradientBoostingRegressor] = None,
+    model: Optional[Pipeline] = None,
 ) -> AgentOutput:
     """
     Generate an intrinsic-level inventory forecast.
