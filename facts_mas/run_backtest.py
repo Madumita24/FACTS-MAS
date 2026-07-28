@@ -3,7 +3,14 @@ Backtest Harness — FACTS-MAS Phase 2.
 
 6-fold expanding-window backtest per evaluation_protocol.md.
 
-Fold table (synced with fold_boundaries.py, Jan 2026 cutoff):
+Fold table -- CORRECTED to the Jan-2026 live-eval cutoff (Prof. Pan Round-2
+feedback). The table below supersedes evaluation_protocol.md's own fold
+table, which still reflects a since-superseded Jan-2025 cutoff assumption;
+that doc's update is deliberately deferred until all agents are validated
+against these dates (see progress.md) -- this file is the actual source of
+truth for backtest execution in the meantime.
+
+Fold table (from fold_boundaries.py, Jan-2026 cutoff):
     | Fold | Train start | Train end  | Test start | Test end   |
     |------|-------------|------------|------------|------------|
     | 1    | 2019-02-02  | 2021-01-23 | 2021-05-01 | 2021-11-13 |
@@ -197,13 +204,14 @@ def run_backtest(
         validate_embargo(fold)
 
         # 2. Compute fold weights
-        # Use the last 20 weeks of training data as validation for weighting
-        val_window_start = fold.train_end - datetime.timedelta(weeks=20)
+        # 104-week lookback aggregated across all 3 horizons, p=2 weighting --
+        # see fusion_baseline.py's module docstring for why the original
+        # 20-week/8wk-only/p=1 design couldn't separate Macro's validated
+        # null from agents with real signal.
         from facts_mas.fusion_baseline import compute_fold_weights
         weights = compute_fold_weights(
             df, agent_runners, msas,
-            val_window_start, fold.train_end,
-            horizon_weeks=8,  # Use 8-week horizon for weight calibration
+            train_end=fold.train_end,
         )
         weight_log.append({"fold": fold.fold, "weights": weights})
         print(f"Fold {fold.fold} weights: {weights}")
@@ -293,5 +301,91 @@ def run_backtest(
     return results
 
 
+def _make_intrinsic_runner(static_df: pd.DataFrame) -> callable:
+    """run_intrinsic_agent takes an extra static_df positional arg (weekly_df,
+    static_df, msa, forecast_origin, horizon_weeks) that doesn't fit the
+    (df, msa, origin, horizon) convention every other runner in agent_runners
+    uses. functools.partial can't fix this by itself since static_df sits in
+    the middle of the positional order, not the end -- so a small explicit
+    closure is needed to reorder the call. Not a change to intrinsic_agent.py
+    itself, just glue at the call site (same kind of adapter as
+    _fusion_fn_adapter below, for the same reason: bridging calling
+    conventions, not changing model logic).
+    """
+    from facts_mas.agents.intrinsic_agent import run_intrinsic_agent
+
+    def _runner(df, msa, forecast_origin, horizon_weeks):
+        return run_intrinsic_agent(df, static_df, msa, forecast_origin, horizon_weeks)
+
+    return _runner
+
+
+def _fusion_fn_adapter(agent_outputs: dict, weights: dict) -> list:
+    """run_backtest() calls fusion_fn(agent_outputs, weights) with a raw
+    dict[str, AgentOutput] -- but fusion_baseline.fuse_forecasts expects a
+    validated FusionInput, not a raw dict. This is a real (minor) signature
+    mismatch between the two modules, not something to silently paper over:
+    bridged here with an adapter rather than by modifying either module, per
+    "confirm they work without modification."
+    """
+    from facts_mas.fusion_baseline import fuse_forecasts
+    from facts_mas.schema import FusionInput
+
+    sample = next(iter(agent_outputs.values()))
+    fusion_input = FusionInput(
+        msa=sample.msa,
+        forecast_origin=sample.forecast_origin,
+        horizon_weeks=sample.horizon_weeks,
+        agent_outputs=agent_outputs,
+    )
+    return fuse_forecasts(fusion_input, weights)
+
+
+def build_agent_runners() -> dict:
+    """All 5 agents, each matching the (df, msa, forecast_origin, horizon_weeks)
+    -> AgentOutput calling convention agent_runners requires."""
+    from facts_mas.agents.ar_agent import run_ar_agent
+    from facts_mas.agents.event_agent import run_event_agent
+    from facts_mas.agents.macro_agent import run_macro_agent
+    from facts_mas.agents.seasonality_agent import run_seasonality_agent
+
+    static_df = pd.read_csv("intrinsic_static.csv")
+
+    return {
+        "ar": run_ar_agent,
+        "macro": run_macro_agent,
+        "event": run_event_agent,
+        "seasonality": run_seasonality_agent,
+        "intrinsic": _make_intrinsic_runner(static_df),
+    }
+
+
 if __name__ == "__main__":
-    print("Backtest harness loaded. Run via: python -m facts_mas.run_backtest")
+    import argparse
+    import sys
+
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.path.insert(0, ".")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--msas", type=str, default=None,
+                         help="Comma-separated MSA subset (default: all 15)")
+    parser.add_argument("--folds", type=str, default=None,
+                         help="Comma-separated fold indices, e.g. '1' or '1,2' (default: all 6)")
+    args = parser.parse_args()
+
+    weekly_df = pd.read_csv("aligned_weekly.csv", parse_dates=["date"])
+
+    msas = args.msas.split(",") if args.msas else None
+    folds = [f for f in FOLDS if f.fold in {int(x) for x in args.folds.split(",")}] if args.folds else None
+
+    print(f"Running backtest: msas={msas or 'all 15'}, folds={[f.fold for f in folds] if folds else 'all 6'}")
+
+    agent_runners = build_agent_runners()
+    results = run_backtest(weekly_df, agent_runners, _fusion_fn_adapter, msas=msas, folds=folds)
+
+    print(f"\n{len(results)} BacktestResult rows produced.")
+    for r in results[:10]:
+        print(f"  fold={r.fold} msa={r.msa} horizon={r.horizon_weeks} regime={r.regime} "
+              f"mape={r.mape:.2f} rmse={r.rmse:.1f} n_origins={r.n_origins}")

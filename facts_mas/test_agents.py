@@ -46,6 +46,11 @@ from facts_mas.run_backtest import (
     compute_rmse,
     naive_forecast,
 )
+from facts_mas.agents.ar_agent import run_ar_agent
+from facts_mas.agents.macro_agent import run_macro_agent
+from facts_mas.agents.event_agent import run_event_agent
+from facts_mas.fusion_baseline import fuse_forecasts
+from facts_mas.schema import FusionInput
 
 # Load real data
 WEEKLY_DF = pd.read_csv("aligned_weekly.csv", parse_dates=["date"])
@@ -213,6 +218,100 @@ check("Intrinsic works on held-out MSA (leave-one-out)", test_intrinsic_held_out
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# AR AGENT TESTS
+# ══════════════════════════════════════════════════════════════════════════
+print("\n-- AR Agent --")
+
+
+def test_ar_shape():
+    origin = datetime.date(2023, 6, 1)
+    for horizon in [4, 8, 13]:
+        out = run_ar_agent(WEEKLY_DF, "Atlanta", origin, horizon)
+        assert len(out.values) == horizon
+        assert out.agent_name == "ar"
+
+check("AR output shape matches horizon (4/8/13)", test_ar_shape)
+
+
+def test_ar_non_negative():
+    origin = datetime.date(2023, 6, 1)
+    out = run_ar_agent(WEEKLY_DF, "Miami", origin, 13)
+    assert all(v >= 0 for v in out.values)
+
+check("AR output is non-negative (checked on Miami, the known-volatile MSA)", test_ar_non_negative)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# MACRO AGENT TESTS
+# ══════════════════════════════════════════════════════════════════════════
+print("\n-- Macro Agent --")
+
+
+def test_macro_shape():
+    origin = datetime.date(2023, 6, 1)
+    for horizon in [4, 8, 13]:
+        out = run_macro_agent(WEEKLY_DF, "Atlanta", origin, horizon)
+        assert len(out.values) == horizon
+        assert out.agent_name == "macro"
+
+check("Macro output shape matches horizon (4/8/13)", test_macro_shape)
+
+
+def test_macro_non_negative():
+    origin = datetime.date(2023, 6, 1)
+    out = run_macro_agent(WEEKLY_DF, "Atlanta", origin, 13)
+    assert all(v >= 0 for v in out.values)
+
+check("Macro output is non-negative", test_macro_non_negative)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# EVENT AGENT TESTS
+# ══════════════════════════════════════════════════════════════════════════
+print("\n-- Event Agent --")
+
+
+def test_event_shape():
+    origin = datetime.date(2023, 6, 1)
+    for horizon in [4, 8, 13]:
+        out = run_event_agent(WEEKLY_DF, "Atlanta", origin, horizon)
+        assert len(out.values) == horizon
+        assert out.agent_name == "event"
+
+check("Event output shape matches horizon (4/8/13)", test_event_shape)
+
+
+def test_event_non_negative():
+    origin = datetime.date(2023, 6, 1)
+    out = run_event_agent(WEEKLY_DF, "Miami", origin, 13)
+    assert all(v >= 0 for v in out.values)
+
+check("Event output is non-negative", test_event_non_negative)
+
+
+def test_event_populates_confidence():
+    """Event is the one agent in the current lineup expected to populate
+    confidence (schema.py's Optional field) -- confirms it's not left None."""
+    origin = datetime.date(2023, 6, 1)
+    out = run_event_agent(WEEKLY_DF, "Miami", origin, 8)
+    assert out.confidence is not None
+    assert len(out.confidence) == 8
+    assert all(0.0 <= c <= 1.0 for c in out.confidence)
+
+check("Event populates confidence (the one agent expected to)", test_event_populates_confidence)
+
+
+def test_ar_macro_do_not_populate_confidence():
+    origin = datetime.date(2023, 6, 1)
+    ar_out = run_ar_agent(WEEKLY_DF, "Atlanta", origin, 8)
+    macro_out = run_macro_agent(WEEKLY_DF, "Atlanta", origin, 8)
+    assert ar_out.confidence is None
+    assert macro_out.confidence is None
+
+check("AR and Macro leave confidence unpopulated (None)", test_ar_macro_do_not_populate_confidence)
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # VALIDATION LAYER TESTS
 # ══════════════════════════════════════════════════════════════════════════
 print("\n-- Validation Layer --")
@@ -360,6 +459,35 @@ def test_end_to_end_single_msa():
     assert all(v >= 0 for v in fused)
 
 check("End-to-end: both agents + fusion on Phoenix", test_end_to_end_single_msa)
+
+
+def test_end_to_end_all_five_agents():
+    """Run all 5 agents on a single MSA and fuse via the real fuse_forecasts
+    (FusionInput contract), not manual averaging -- confirms fusion_baseline.py
+    works against the full lineup without modification."""
+    msa = "Phoenix"
+    origin = datetime.date(2023, 6, 1)
+    horizon = 8
+
+    outputs = {
+        "ar": run_ar_agent(WEEKLY_DF, msa, origin, horizon),
+        "macro": run_macro_agent(WEEKLY_DF, msa, origin, horizon),
+        "event": run_event_agent(WEEKLY_DF, msa, origin, horizon),
+        "seasonality": run_seasonality_agent(WEEKLY_DF, msa, origin, horizon),
+        "intrinsic": run_intrinsic_agent(WEEKLY_DF, STATIC_DF, msa, origin, horizon),
+    }
+    for name, out in outputs.items():
+        assert validate_agent_output(out) == []
+
+    fusion_input = FusionInput(
+        msa=msa, forecast_origin=origin, horizon_weeks=horizon, agent_outputs=outputs,
+    )
+    weights = {name: 0.2 for name in outputs}  # equal weights for this shape/plumbing check
+    fused = fuse_forecasts(fusion_input, weights)
+    assert len(fused) == horizon
+    assert all(v >= 0 for v in fused)
+
+check("End-to-end: all 5 agents + real fuse_forecasts on Phoenix", test_end_to_end_all_five_agents)
 
 
 # ══════════════════════════════════════════════════════════════════════════

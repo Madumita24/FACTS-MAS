@@ -171,14 +171,28 @@ def run_intrinsic_agent(
 
     last_inventory = float(msa_recent["inventory_count"].iloc[-1])
 
-    # Mean-reversion forecast:
-    # At step t, forecast = last_inventory + reversion_rate * t * (structural - last)
-    # reversion_rate chosen so that at horizon_weeks, we've reverted ~30%
-    reversion_rate = 0.30 / max(horizon_weeks, 1)
+    # Mean-reversion forecast, quadratic curve (changed from linear):
+    # reversion_frac(step) = TOTAL_REVERSION * (step / horizon_weeks)^2
+    #
+    # Original design reverted LINEARLY (reversion_frac = 0.30/horizon_weeks
+    # * step), meaning the fraction reverted per step was constant regardless
+    # of horizon length -- e.g. at h=4, fully 25% of the step's progress
+    # toward horizon_weeks happens in week 1 alone. Diagnosed via a live
+    # sanity check: Intrinsic's skill vs. naive was worst at h=4 (mean
+    # -1.98) and improved monotonically toward h=13 (mean -0.28) -- the
+    # signature of reverting too far too soon, before the actual series has
+    # had time to move that much.
+    # The quadratic curve keeps the SAME total ~30% reversion by the end of
+    # a 13-week horizon (reversion_frac(horizon_weeks) = TOTAL_REVERSION,
+    # unchanged from the original design intent), but redistributes WHEN
+    # that reversion happens: at h=4 step=1, reversion_frac is now
+    # 0.30*(1/4)^2 = 0.019 (vs. the old linear 0.075) -- a much gentler
+    # start, with most of the pull arriving later in the window.
+    TOTAL_REVERSION = 0.30
 
     forecast_values = []
     for step in range(1, horizon_weeks + 1):
-        reversion_frac = min(reversion_rate * step, 1.0)
+        reversion_frac = TOTAL_REVERSION * (step / horizon_weeks) ** 2
         projected = last_inventory + reversion_frac * (
             structural_level - last_inventory
         )
