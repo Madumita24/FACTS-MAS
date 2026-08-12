@@ -301,6 +301,48 @@ def test_event_populates_confidence():
 check("Event populates confidence (the one agent expected to)", test_event_populates_confidence)
 
 
+def test_event_values_flat_at_last_inventory_on_active_declaration():
+    """IMPACT_SCALE removed (calibration.py: 0.0 beat every positive value
+    tested, 6/6 folds). Miami 2022-11-12 has a real active declaration with
+    impact_magnitude=-0.5, confidence=0.7 (event_agent_weekly.csv) -- exactly
+    the case that used to move the forecast. Confirms it no longer does:
+    values must equal last_inventory held flat, not last_inventory*factor."""
+    origin = datetime.date(2022, 11, 12)
+    horizon = 8
+    last_inventory = float(
+        WEEKLY_DF[(WEEKLY_DF["msa"] == "Miami") & (WEEKLY_DF["date"] <= pd.Timestamp(origin))]
+        .sort_values("date")["inventory_count"].iloc[-1]
+    )
+    out = run_event_agent(WEEKLY_DF, "Miami", origin, horizon)
+    assert out.values == [last_inventory] * horizon
+    # Confidence gating is untouched by the magnitude fix -- this declaration
+    # still clears the >=0.60 bar and is still within the 8wk decay window.
+    assert out.confidence == [0.7] * horizon
+
+check("Event values are flat at last_inventory even on an active declaration "
+      "(magnitude no longer applied)", test_event_values_flat_at_last_inventory_on_active_declaration)
+
+
+def test_event_decay_window_still_zeroes_confidence():
+    """Confirms DECLARATION_ACTIVE_WINDOW_WEEKS gating logic (untouched by
+    this fix) still works: an origin far past a declaration's 8-week window
+    reports confidence=0.0, same as "no declaration" -- and values are flat
+    at last_inventory either way, which is now always true regardless of
+    gating status."""
+    origin = datetime.date(2023, 6, 1)  # no active Miami declaration by this date
+    horizon = 4
+    last_inventory = float(
+        WEEKLY_DF[(WEEKLY_DF["msa"] == "Miami") & (WEEKLY_DF["date"] <= pd.Timestamp(origin))]
+        .sort_values("date")["inventory_count"].iloc[-1]
+    )
+    out = run_event_agent(WEEKLY_DF, "Miami", origin, horizon)
+    assert out.confidence == [0.0] * horizon
+    assert out.values == [last_inventory] * horizon
+
+check("Event decay-window gating still zeroes confidence when no declaration is active",
+      test_event_decay_window_still_zeroes_confidence)
+
+
 def test_ar_macro_do_not_populate_confidence():
     origin = datetime.date(2023, 6, 1)
     ar_out = run_ar_agent(WEEKLY_DF, "Atlanta", origin, 8)

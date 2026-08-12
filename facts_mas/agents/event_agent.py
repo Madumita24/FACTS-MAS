@@ -6,17 +6,22 @@ re-running the LLM per (msa, forecast_origin) query during backtesting would
 be slow, costly, and would make repeated backtest runs non-deterministic;
 the interpretation itself doesn't change between runs, so it's cached.
 
-Same anchoring approach as the Macro Agent wrapper and for the same reason:
-impact_magnitude (-1..+1, already confidence-gated) is applied as a SINGLE
-multiplicative adjustment to the last observed inventory value, not
-compounded per week.
+MAGNITUDE ADJUSTMENT REMOVED (see event_agent.md for the full history):
+this wrapper used to apply impact_magnitude (-1..+1, already confidence-
+gated) as a single multiplicative adjustment to the last observed inventory
+value. Umang's calibration sweep (facts_mas/calibration.py,
+calibrate_event_impact_scale.py) found IMPACT_SCALE=0.0 beats every positive
+value tested, 6/6 folds, with no interior optimum -- the severity score has
+no usable point-forecast magnitude against weekly inventory levels, only
+ordinal/directional content. values is therefore last_inventory held flat
+across the horizon, same anchoring approach as the Macro Agent wrapper.
 
 confidence is populated here -- per the schema's Optional field, this is the
 one agent in the current lineup expected to populate it, since it's the only
 agent whose core model produces a real confidence signal (the LLM's own
 calibrated confidence, not a fusion weight). Repeated across the horizon
-since impact_magnitude/confidence are per-declaration constants in this
-design, not per-week values. When no FEMA declaration is active for this
+since confidence is a per-declaration constant in this design, not a
+per-week value. When no FEMA declaration is active for this
 (msa, forecast_origin), the agent has nothing to say: it reports a neutral
 (last-value-anchored) forecast with confidence=0.0, rather than fabricating
 an event -- consistent with interpret_event()'s "never invent events" rule.
@@ -30,15 +35,16 @@ from facts_mas.schema import AgentOutput
 EVENT_WEEKLY_PATH = "event_agent_weekly.csv"
 _event_weekly_cache: pd.DataFrame = None
 
-# DESIGN CHOICE, not a data fact -- same honesty standard as IMPACT_SCALE
-# below. FEMA's "declaration open" status reflects administrative/funding
-# status (how long assistance programs stay available), not ongoing market
-# disruption. Diagnosed via a live sanity check: COVID-19 declarations
-# stayed federally "open" for 172 weeks, and the wrapper was re-applying a
-# fresh impact_magnitude discount to that WEEK's already-current inventory
-# every single week for the entire span -- double-counting an effect that
-# (if real) had already happened, since the anchor already reflects
-# however the market actually responded. Mean skill on COVID weeks was
+# DESIGN CHOICE, not a data fact. FEMA's "declaration open" status reflects
+# administrative/funding status (how long assistance programs stay
+# available), not ongoing market disruption. Diagnosed via a live sanity
+# check, back when this wrapper still applied a magnitude adjustment:
+# COVID-19 declarations stayed federally "open" for 172 weeks, and the
+# wrapper was re-applying a fresh impact_magnitude discount to that WEEK's
+# already-current inventory every single week for the entire span --
+# double-counting an effect that (if real) had already happened, since the
+# anchor already reflects however the market actually responded. Mean skill
+# on COVID weeks was
 # -1.88 vs. naive as a direct result. 8 weeks is chosen to roughly match
 # the duration of short-lived disasters that scored WELL in that same
 # diagnostic (e.g. Tropical Storm Imelda, 6 weeks) -- a reasonable-but-
@@ -79,7 +85,6 @@ def run_event_agent(
     active = events[(events["msa"] == msa) & (events["week"] == snapped_week)]
 
     if active.empty:
-        impact_magnitude = 0.0
         confidence = 0.0
     else:
         row = active.iloc[0]  # if multiple declarations overlap the same week, take the first
@@ -89,50 +94,17 @@ def run_event_agent(
         if age_weeks is not None and age_weeks > DECLARATION_ACTIVE_WINDOW_WEEKS:
             # Administratively still "open" per FEMA, but treated as expired
             # for forecasting purposes -- see DECLARATION_ACTIVE_WINDOW_WEEKS.
-            impact_magnitude = 0.0
             confidence = 0.0
         else:
             # age_weeks is None only if incident_begin_date itself is missing
-            # (data-quality edge case, not expected in practice) -- falls back
-            # to the pre-fix behavior of applying the impact rather than
-            # guessing at an age we don't have evidence for.
-            impact_magnitude = float(row["impact_magnitude"])  # already confidence-gated in Step 3
+            # (data-quality edge case, not expected in practice).
             confidence = float(row["confidence"])
 
-    # impact_magnitude is a QUALITATIVE -1..+1 severity score by design --
-    # event_agent.py's own prompt explicitly tells the LLM it is "NOT a
-    # precise unit/percent estimate," only a coarse directional signal.
-    # Applying it directly as a pct-change (factor = 1 + impact_magnitude)
-    # would mean a -0.75 score forecasts inventory crashing to 25% of its
-    # prior level in the very next week and staying there for the whole
-    # horizon -- caught via a live sanity check (fold-1 weight diagnostic:
-    # Event's mean APE was 71.6% vs. 6-17% for every other agent, driven
-    # entirely by declaration weeks). IMPACT_SCALE converts the qualitative
-    # score into an approximate weekly pct-change, roughly on the same order
-    # as the Macro Agent's own ridge-fitted modifiers (~1-3%/week) but
-    # somewhat larger, reflecting that a real disaster declaration should
-    # plausibly move inventory more than ambient macro conditions.
-    # ARBITRARY, UNVALIDATED CHOICE -- there is no ground-truth data in this
-    # project connecting qualitative severity scores to actual pct inventory
-    # change, so 0.10 is a documented guess, not a fitted value. Revisit if
-    # real post-disaster inventory data ever becomes available to calibrate
-    # this properly.
-    #
-    # TODO (flagged, not fixed -- one overshoot example isn't enough to
-    # safely change a shared constant tonight): a single fixed IMPACT_SCALE
-    # for every event_type/severity combination looks inconsistent in the
-    # data we already have. At impact_magnitude=-0.50 (program_count=2):
-    # Tropical Storm Imelda and the Saddleridge/Tick/Getty Fires all scored
-    # POSITIVE skill vs. naive (+0.2 to +0.5) -- the resulting -5% adjustment
-    # tracked real outcomes reasonably well. At impact_magnitude=-0.75
-    # (program_count=3): a generic "WILDFIRES" declaration scored strongly
-    # NEGATIVE (-0.9 to -8.5) -- actual decline was only ~-1.5% while the
-    # -7.5% adjustment overshot it roughly 5x. Needs per-event-type or
-    # per-severity-tier calibration against more real outcomes than these
-    # two data points before changing the constant itself.
-    IMPACT_SCALE = 0.10
-    factor = 1.0 + impact_magnitude * IMPACT_SCALE
-    values = [max(0.0, round(last_inventory * factor, 2)) for _ in range(horizon_weeks)]
+    # No magnitude adjustment (see module docstring): values is last_inventory
+    # held flat across the horizon, regardless of event_type/confidence/decay
+    # status above. Those signals still gate `confidence`, they just no
+    # longer move the point forecast -- see event_agent.md.
+    values = [last_inventory] * horizon_weeks
 
     return AgentOutput(
         agent_name="event",

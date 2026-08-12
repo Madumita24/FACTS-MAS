@@ -119,6 +119,14 @@ Near-perfect separation: 56/57 gated rows have `program_count=1` and 55/57 are E
 
 **Event Agent build is now complete** — ready to hand off to the fusion harness alongside the AR Agent's real (non-stub) output.
 
+## Update — magnitude adjustment removed (facts_mas/agents/event_agent.py)
+
+IMPACT_SCALE removed per Umang's calibration sweep (`facts_mas/calibration.py`, `calibrate_event_impact_scale.py`) — 0.0 beat every positive value tested, 6/6 folds, no interior optimum. Event Agent no longer adjusts forecast magnitude; retains event_type classification, confidence gating, and the 8-week decay window. Magnitude signal treated as an unreliable ordinal indicator, not a usable point-forecast modifier (see `calibration.md` and `factor_attribution.md` for full history).
+
+Concretely: `run_event_agent`'s `values` is now `last_inventory` held flat across the horizon, unconditionally — the same value regardless of whether a declaration is active, what its `impact_magnitude`/`event_type`/`program_count` are, or how old it is. Those signals still gate `confidence` (0.0 when no declaration is active, or when one is active but past the 8-week decay window, or — upstream, in `interpret_event`'s own gate, unaffected by this change — below the 0.60 confidence bar); they just no longer move the forecast's magnitude. Confirmed via 3 real active-declaration spot-checks (Phoenix 2021-06-12, Miami 2022-11-12, Chicago 2020-01-25) that `values` is flat at `last_inventory` and `confidence` still reflects the correct gated value in each case.
+
+This is the minimal, literal application of the calibration finding — not the confidence-weight-boost redesign considered and abandoned earlier, and not a change to what "AR's own forecast" would look like (the wrapper still anchors on `last_inventory`, same as before; it just no longer perturbs it).
+
 ## Open items
 
 1. **The Ian/Nicole-style data ceiling recurs at scale, as expected**: any two declarations sharing declaration_type + program_count tie on magnitude, by design (correct behavior, not a bug) — this is why the full batch collapses to essentially 2 non-gated values (-0.50, -0.75) plus 0 (gated). Not a red flag; a direct consequence of the documented 4-tier-classifier behavior.
