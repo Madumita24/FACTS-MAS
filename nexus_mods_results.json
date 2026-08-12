@@ -1,0 +1,180 @@
+{
+  "mod_b": {
+    "pairs_tested": 210,
+    "significant_edges": 67,
+    "density": 0.319047619047619,
+    "mean_lag_weeks": 3.3134328358208953,
+    "isolated_msas": [],
+    "top_edges": [
+      {
+        "source": "Seattle",
+        "target": "New York",
+        "lag": 3,
+        "p": 2.5838093328181966e-09
+      },
+      {
+        "source": "Boston",
+        "target": "New York",
+        "lag": 3,
+        "p": 3.9027517924163167e-07
+      },
+      {
+        "source": "Miami",
+        "target": "New York",
+        "lag": 3,
+        "p": 7.778549055662027e-07
+      },
+      {
+        "source": "Houston",
+        "target": "New York",
+        "lag": 3,
+        "p": 2.6678822547227905e-05
+      },
+      {
+        "source": "New York",
+        "target": "Seattle",
+        "lag": 3,
+        "p": 4.631990894571482e-05
+      },
+      {
+        "source": "Riverside",
+        "target": "New York",
+        "lag": 3,
+        "p": 5.716821940715586e-05
+      },
+      {
+        "source": "San Francisco",
+        "target": "Houston",
+        "lag": 2,
+        "p": 6.53050448927669e-05
+      },
+      {
+        "source": "San Francisco",
+        "target": "Atlanta",
+        "lag": 2,
+        "p": 8.937813787065338e-05
+      }
+    ]
+  },
+  "mod_a": {
+    "n_forecasts": 435,
+    "n_activated": 35,
+    "activation_rate": 0.08045977011494253,
+    "skip_rate": 0.9195402298850575,
+    "heavy_loop_calls_saved": 400,
+    "by_trigger": {
+      "none": 400,
+      "baseline_anomaly": 34,
+      "natural_disaster": 1
+    }
+  },
+  "mod_c": {
+    "fused": {
+      "n_forecasts": 120,
+      "clean": 120,
+      "corrected": 0,
+      "fell_back_to_baseline": 0,
+      "violation_rate": 0.0,
+      "violations_by_type": {},
+      "mean_attempts": 0.0
+    },
+    "per_agent": {
+      "ar": {
+        "n_forecasts": 120,
+        "clean": 119,
+        "corrected": 0,
+        "fell_back_to_baseline": 1,
+        "violation_rate": 0.008333333333333304,
+        "violations_by_type": {
+          "excessive_pct_change": 2
+        },
+        "mean_attempts": 0.016666666666666666
+      },
+      "event": {
+        "n_forecasts": 120,
+        "clean": 120,
+        "corrected": 0,
+        "fell_back_to_baseline": 0,
+        "violation_rate": 0.0,
+        "violations_by_type": {},
+        "mean_attempts": 0.0
+      },
+      "intrinsic": {
+        "n_forecasts": 120,
+        "clean": 120,
+        "corrected": 0,
+        "fell_back_to_baseline": 0,
+        "violation_rate": 0.0,
+        "violations_by_type": {},
+        "mean_attempts": 0.0
+      },
+      "macro": {
+        "n_forecasts": 120,
+        "clean": 120,
+        "corrected": 0,
+        "fell_back_to_baseline": 0,
+        "violation_rate": 0.0,
+        "violations_by_type": {},
+        "mean_attempts": 0.0
+      },
+      "seasonality": {
+        "n_forecasts": 120,
+        "clean": 120,
+        "corrected": 0,
+        "fell_back_to_baseline": 0,
+        "violation_rate": 0.0,
+        "violations_by_type": {},
+        "mean_attempts": 0.0
+      }
+    }
+  },
+  "mod_d": {
+    "by_horizon": {
+      "4": {
+        "horizon_weeks": 4,
+        "n_forecasts": 2610,
+        "sequential_calls": 10440,
+        "batched_calls": 2610,
+        "calls_saved": 7830,
+        "reduction": 0.75,
+        "assumed_batch_failure_rate": 0.0
+      },
+      "8": {
+        "horizon_weeks": 8,
+        "n_forecasts": 2610,
+        "sequential_calls": 20880,
+        "batched_calls": 2610,
+        "calls_saved": 18270,
+        "reduction": 0.875,
+        "assumed_batch_failure_rate": 0.0
+      },
+      "13": {
+        "horizon_weeks": 13,
+        "n_forecasts": 2610,
+        "sequential_calls": 33930,
+        "batched_calls": 2610,
+        "calls_saved": 31320,
+        "reduction": 0.9230769230769231,
+        "assumed_batch_failure_rate": 0.0
+      }
+    },
+    "h26": {
+      "horizon_weeks": 26,
+      "n_forecasts": 2610,
+      "sequential_calls": 67860,
+      "batched_calls": 2610,
+      "calls_saved": 65250,
+      "reduction": 0.9615384615384616,
+      "assumed_batch_failure_rate": 0.0
+    },
+    "h13_10pct_failure": {
+      "horizon_weeks": 13,
+      "n_forecasts": 2610,
+      "sequential_calls": 33930,
+      "batched_calls": 6003,
+      "calls_saved": 27927,
+      "reduction": 0.823076923076923,
+      "assumed_batch_failure_rate": 0.1
+    }
+  }
+}
