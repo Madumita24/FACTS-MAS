@@ -290,6 +290,7 @@ def skill_score_pooled(agent_apes: list[float], naive_apes: list[float]) -> floa
 def fuse_forecasts(
     fusion_input: FusionInput,
     weights: dict[str, float],
+    expected_agents: Optional[set[str]] = None,
 ) -> list[float]:
     """
     Combine agent forecasts using the given weights.
@@ -297,14 +298,24 @@ def fuse_forecasts(
     forecast[t] = sum(weight_i * agent_i.values[t]) for each timestep t.
 
     Args:
-        fusion_input: Validated FusionInput with all agents' outputs.
+        fusion_input: Validated FusionInput with the agents' outputs.
         weights: {agent_name: weight}, should sum to ~1.0.
+        expected_agents: Which agents must be present. Defaults to every
+            agent carrying non-zero weight, which is what actually matters
+            here: an agent with zero weight contributes nothing whether it
+            ran or not, while an agent with weight but no forecast would
+            silently shrink the fused total. This makes ablations work
+            (drop the agent from `weights` and it stops being required)
+            without weakening the check for production runs.
 
     Returns:
         Fused forecast values (one per horizon week).
     """
+    if expected_agents is None:
+        expected_agents = {name for name, w in weights.items() if w > 0.0}
+
     # Validate before fusing
-    errors = validate_fusion_input(fusion_input)
+    errors = validate_fusion_input(fusion_input, expected_agents=expected_agents)
     if errors:
         raise ValueError(f"Fusion input validation failed: {errors}")
 

@@ -158,6 +158,41 @@ def naive_forecast(last_value: float, horizon: int) -> list[float]:
 # Main backtest loop
 # ═══════════════════════════════════════════════════════════════════════════
 
+WEIGHTING_MODES = ("fold", "regime", "adaptive", "adaptive_granular")
+
+
+def _select_weights(
+    weighting_mode: str,
+    horizon: int,
+    regime: str,
+    fold_weights: dict,
+    regime_grid: Optional[dict],
+    mode_selection: dict,
+) -> dict:
+    """
+    Which weight set applies to one (horizon, regime) cell.
+
+    "fold"      one set per fold, regime-blind (the original behaviour).
+    "regime"    one set per (regime, horizon), looked up per origin.
+    "adaptive"  per (fold, horizon), whichever of the two scored lower on
+                that fold's own validation window.
+    "adaptive_granular"
+                same idea, decided per (fold, horizon, regime).
+
+    Selection always happens on validation data (see run_backtest), never on
+    the test window, so the choice itself cannot leak into the held-out
+    evaluation.
+    """
+    if weighting_mode == "fold":
+        return fold_weights
+    if weighting_mode == "regime":
+        return regime_grid[regime][f"{horizon}wk"]["weights"]
+    key = horizon if weighting_mode == "adaptive" else (horizon, regime)
+    if mode_selection.get(key, "fold") == "regime":
+        return regime_grid[regime][f"{horizon}wk"]["weights"]
+    return fold_weights
+
+
 def run_backtest(
     df: pd.DataFrame,
     agent_runners: dict[str, callable],
@@ -165,6 +200,7 @@ def run_backtest(
     msas: Optional[list[str]] = None,
     folds: Optional[list[FoldSpec]] = None,
     horizons: Optional[list[int]] = None,
+    weighting_mode: str = "adaptive",
 ) -> list[BacktestResult]:
     """
     Execute the 6-fold expanding-window backtest.
@@ -172,11 +208,14 @@ def run_backtest(
     For each fold:
         1. Validate the 13-week embargo.
         2. Compute per-fold fusion weights from the training window.
-        3. For each MSA and horizon:
-            a. Generate forecasts at every weekly origin in the test window.
-            b. Compute MAPE and RMSE.
-            c. Classify the regime at each origin.
-        4. Log fold-to-fold weight evolution.
+        3. If the mode needs them, compute the (regime x horizon) weight
+           grid and run the mode-selection comparison -- both on the same
+           104-week validation window, never on test data.
+        4. For each MSA and horizon:
+            a. Forecast at every weekly origin in the test window.
+            b. Classify the regime, pick the weight set for that cell, fuse.
+            c. Compute MAPE and RMSE, grouped by regime.
+        5. Log fold-to-fold weight evolution.
 
     Args:
         df: aligned_weekly.csv with 'date' as datetime.
@@ -185,6 +224,15 @@ def run_backtest(
         msas: List of MSAs (defaults to all 15).
         folds: Fold specs (defaults to FOLDS).
         horizons: Horizons to evaluate (defaults to [4, 8, 13]).
+        weighting_mode: One of WEIGHTING_MODES. Defaults to "adaptive", the
+            production default per factor_attribution.md. Fold-level
+            weighting alone loses to naive at 13wk during hiking and
+            cutting, which is the failure the regime-aware work exists to
+            fix. "adaptive_granular" is fully implemented but deliberately
+            NOT the default: it fixes 8wk/hiking and regresses three other
+            cells, because rare-regime validation slices can come back
+            empty and fall back to "fold". See factor_attribution.md
+            sections 3 and 9.
 
     Returns:
         List of BacktestResult objects.
@@ -195,6 +243,11 @@ def run_backtest(
         folds = FOLDS
     if horizons is None:
         horizons = HORIZONS
+    if weighting_mode not in WEIGHTING_MODES:
+        raise ValueError(
+            f"weighting_mode must be one of {WEIGHTING_MODES}, "
+            f"got '{weighting_mode}'"
+        )
 
     results = []
     weight_log = []
@@ -209,12 +262,49 @@ def run_backtest(
         # 20-week/8wk-only/p=1 design couldn't separate Macro's validated
         # null from agents with real signal.
         from facts_mas.fusion_baseline import compute_fold_weights
-        weights = compute_fold_weights(
+        fold_weights = compute_fold_weights(
             df, agent_runners, msas,
             train_end=fold.train_end,
         )
-        weight_log.append({"fold": fold.fold, "weights": weights})
-        print(f"Fold {fold.fold} weights: {weights}")
+        weight_log.append({"fold": fold.fold, "weights": fold_weights})
+        print(f"Fold {fold.fold} weights ({weighting_mode}): {fold_weights}")
+
+        # 3. Regime grid + mode selection, validation window only. Skipped
+        #    entirely for "fold" mode so the original path pays none of it.
+        regime_grid = None
+        mode_selection: dict = {}
+        if weighting_mode != "fold":
+            from facts_mas.factor_attribution import (
+                compute_all_regime_weights,
+                evaluate_validation_mape,
+            )
+            regime_grid = compute_all_regime_weights(
+                df, agent_runners, msas, fold
+            )["grid"]
+
+            if weighting_mode == "adaptive":
+                for horizon in horizons:
+                    fm, rm = evaluate_validation_mape(
+                        df, agent_runners, msas, fold, horizon,
+                        fold_weights, regime_grid,
+                    )
+                    # Ties and non-finite comparisons fall back to "fold".
+                    mode_selection[horizon] = "fold" if fm <= rm else "regime"
+                    print(f"  fold {fold.fold} h={horizon}: fold={fm:.3f} "
+                          f"regime={rm:.3f} -> {mode_selection[horizon]}")
+
+            elif weighting_mode == "adaptive_granular":
+                for horizon in horizons:
+                    for regime in ("hiking", "cutting", "stable"):
+                        fm, rm = evaluate_validation_mape(
+                            df, agent_runners, msas, fold, horizon,
+                            fold_weights, regime_grid, regime_filter=regime,
+                        )
+                        key = (horizon, regime)
+                        mode_selection[key] = "fold" if fm <= rm else "regime"
+                        print(f"  fold {fold.fold} h={horizon} {regime}: "
+                              f"fold={fm:.3f} regime={rm:.3f} "
+                              f"-> {mode_selection[key]}")
 
         for msa in msas:
             msa_data = df[df["msa"] == msa].sort_values("date")
@@ -250,16 +340,23 @@ def run_backtest(
                             output = runner(df, msa, origin, horizon)
                             agent_outputs[agent_name] = output
                         except Exception as e:
-                            # Agent failed — skip this origin
+                            # Agent failed - skip this origin
                             break
                     else:
-                        # All agents succeeded
+                        # All agents succeeded. Regime is classified BEFORE
+                        # fusing now, because every mode except "fold" needs
+                        # it to choose the weight set.
+                        regime = classify_regime(df, msa, origin)
+                        weights = _select_weights(
+                            weighting_mode, horizon, regime,
+                            fold_weights, regime_grid, mode_selection,
+                        )
+
                         fused = fusion_fn(agent_outputs, weights)
                         fused_arr = np.array(fused, dtype=np.float64)
 
                         mape = compute_mape(actuals, fused_arr)
                         rmse = compute_rmse(actuals, fused_arr)
-                        regime = classify_regime(df, msa, origin)
 
                         all_mapes.append(mape)
                         all_rmses.append(rmse)
@@ -284,7 +381,12 @@ def run_backtest(
                             rmse=float(np.mean(regime_rmses)),
                             regime=regime,
                             n_origins=len(regime_mapes),
-                            agent_weights=weights,
+                            # The weights actually used for this cell, which
+                            # under a regime-aware mode is not fold_weights.
+                            agent_weights=_select_weights(
+                                weighting_mode, horizon, regime,
+                                fold_weights, regime_grid, mode_selection,
+                            ),
                         ))
 
     # Confirm weights changed across folds (not frozen)
@@ -373,6 +475,9 @@ if __name__ == "__main__":
                          help="Comma-separated MSA subset (default: all 15)")
     parser.add_argument("--folds", type=str, default=None,
                          help="Comma-separated fold indices, e.g. '1' or '1,2' (default: all 6)")
+    parser.add_argument("--weighting-mode", type=str, default="adaptive",
+                         choices=list(WEIGHTING_MODES),
+                         help="Fusion weighting strategy (default: adaptive)")
     args = parser.parse_args()
 
     weekly_df = pd.read_csv("aligned_weekly.csv", parse_dates=["date"])
@@ -380,10 +485,14 @@ if __name__ == "__main__":
     msas = args.msas.split(",") if args.msas else None
     folds = [f for f in FOLDS if f.fold in {int(x) for x in args.folds.split(",")}] if args.folds else None
 
-    print(f"Running backtest: msas={msas or 'all 15'}, folds={[f.fold for f in folds] if folds else 'all 6'}")
+    print(f"Running backtest: msas={msas or 'all 15'}, "
+           f"folds={[f.fold for f in folds] if folds else 'all 6'}, "
+           f"weighting_mode={args.weighting_mode}")
 
     agent_runners = build_agent_runners()
-    results = run_backtest(weekly_df, agent_runners, _fusion_fn_adapter, msas=msas, folds=folds)
+    results = run_backtest(weekly_df, agent_runners, _fusion_fn_adapter,
+                            msas=msas, folds=folds,
+                            weighting_mode=args.weighting_mode)
 
     print(f"\n{len(results)} BacktestResult rows produced.")
     for r in results[:10]:

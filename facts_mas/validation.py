@@ -125,25 +125,42 @@ def validate_agent_output(
     return errors
 
 
+#: The full production lineup. Kept as a named constant so an ablation has
+#: to opt out of an agent explicitly rather than by editing a literal.
+ALL_AGENTS = frozenset({"ar", "macro", "event", "seasonality", "intrinsic"})
+
+
 def validate_fusion_input(
     fusion_input: FusionInput,
-    expected_agents: set[str] = frozenset(
-        {"ar", "macro", "event", "seasonality", "intrinsic"}
-    ),
+    expected_agents: Optional[set[str]] = None,
 ) -> list[str]:
     """
     Validate a complete FusionInput before fusion.
 
     Checks:
-        - All expected agents are present.
+        - Every expected agent is present.
         - Each individual agent output passes validation.
+
+    expected_agents controls only the FIRST check. It previously defaulted
+    to all five agents, which meant a deliberate 4-agent run (every row of
+    the Phase-4 ablation table) failed validation exactly like an accidental
+    one. The check is worth keeping -- an agent that silently failed to run
+    should not be quietly fused around -- so the fix is to let the caller
+    state what it expects, not to drop the check.
+
+    Passing None means "expect whatever was supplied": per-output validation
+    still runs, but no agent is required. Callers that know their intended
+    lineup should pass it explicitly; fuse_forecasts derives it from the
+    weights it was handed, which is a stricter check than the old hardcoded
+    set because it also catches an agent that has weight but no forecast.
     """
     errors = []
 
     # Check all expected agents are present
-    missing = expected_agents - set(fusion_input.agent_outputs.keys())
-    if missing:
-        errors.append(f"Missing agents: {missing}")
+    if expected_agents is not None:
+        missing = set(expected_agents) - set(fusion_input.agent_outputs.keys())
+        if missing:
+            errors.append(f"Missing agents: {missing}")
 
     # Validate each agent's output
     for name, output in fusion_input.agent_outputs.items():
