@@ -205,3 +205,97 @@ def run_intrinsic_agent(
         horizon_weeks=horizon_weeks,
         values=forecast_values,
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Historical-mean baseline -- a third structural-target variant, evaluated
+# alongside GBM (v1) and Ridge (v2), not replacing either here.
+#
+# No model training at all: the "structural level" is just each MSA's own
+# historical mean inventory over the training window. This has no features
+# to generalize from, so MSA-level leave-one-out (as run for GBM/Ridge)
+# doesn't apply in any meaningful sense here -- there's no cross-MSA
+# relationship being tested, since nothing is being predicted FROM other
+# MSAs' data. MSA-LEVEL LEAVE-ONE-OUT DOESN'T APPLY TO A NO-FEATURE MODEL;
+# FOLD-LEVEL BACKTEST PERFORMANCE IS THE CORRECT COMPARISON INSTEAD -- see
+# scratch_intrinsic_variants_comparison.py for that evaluation (not wired
+# into build_agent_runners() here; this is a comparison candidate).
+# ═══════════════════════════════════════════════════════════════════════════
+
+class HistoricalMeanModel:
+    """Maps msa -> its historical mean inventory over some training window.
+    Not a scikit-learn model -- no fitting, no features, just a lookup."""
+
+    def __init__(self, means: pd.Series):
+        self._means = means
+
+    def predict_for_msa(self, msa: str) -> float:
+        if msa not in self._means.index:
+            raise ValueError(f"No historical mean available for msa='{msa}'")
+        return float(self._means[msa])
+
+
+def train_historical_mean_model(
+    weekly_df: pd.DataFrame,
+    train_end: datetime.date,
+    *,
+    exclude_msa: Optional[str] = None,
+) -> HistoricalMeanModel:
+    """No training in the model-fitting sense -- just a groupby mean over
+    the training window. exclude_msa is accepted for interface parity with
+    train_intrinsic_model, but excluding an MSA from a per-MSA mean lookup
+    has no effect on any OTHER msa's mean (unlike GBM/Ridge, where excluding
+    an MSA changes every other MSA's fitted coefficients) -- kept only so
+    callers written against the GBM/Ridge interface don't need a special
+    case for this variant.
+    """
+    train_data = weekly_df[weekly_df["date"] <= pd.Timestamp(train_end)]
+    means = train_data.groupby("msa")["inventory_count"].mean()
+    if exclude_msa is not None and exclude_msa in means.index:
+        means = means.drop(exclude_msa)
+    return HistoricalMeanModel(means)
+
+
+def run_intrinsic_agent_historical_mean(
+    weekly_df: pd.DataFrame,
+    static_df: pd.DataFrame,
+    msa: str,
+    forecast_origin: datetime.date,
+    horizon_weeks: int,
+    *,
+    model: Optional[HistoricalMeanModel] = None,
+) -> AgentOutput:
+    """Same (weekly_df, static_df, msa, forecast_origin, horizon_weeks) ->
+    AgentOutput contract and the same quadratic reversion mechanics as
+    run_intrinsic_agent -- only the structural-level source differs
+    (historical mean, not a fitted regression). static_df is accepted for
+    interface parity with run_intrinsic_agent (so this drops into
+    build_agent_runners()-style wiring identically) but isn't actually
+    used, since this variant has no features to read from it.
+    """
+    if model is None:
+        model = train_historical_mean_model(weekly_df, forecast_origin)
+
+    structural_level = model.predict_for_msa(msa)
+
+    msa_recent = weekly_df[
+        (weekly_df["msa"] == msa) & (weekly_df["date"] <= pd.Timestamp(forecast_origin))
+    ].sort_values("date")
+    if msa_recent.empty:
+        raise ValueError(f"No data for MSA '{msa}' before {forecast_origin}")
+    last_inventory = float(msa_recent["inventory_count"].iloc[-1])
+
+    TOTAL_REVERSION = 0.30
+    forecast_values = []
+    for step in range(1, horizon_weeks + 1):
+        reversion_frac = TOTAL_REVERSION * (step / horizon_weeks) ** 2
+        projected = last_inventory + reversion_frac * (structural_level - last_inventory)
+        forecast_values.append(max(0.0, round(projected, 2)))
+
+    return AgentOutput(
+        agent_name="intrinsic",
+        msa=msa,
+        forecast_origin=forecast_origin,
+        horizon_weeks=horizon_weeks,
+        values=forecast_values,
+    )

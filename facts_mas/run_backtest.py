@@ -217,6 +217,49 @@ def run_backtest(
             c. Compute MAPE and RMSE, grouped by regime.
         5. Log fold-to-fold weight evolution.
 
+    weighting_mode:
+        "fold": one weight set per fold, from compute_fold_weights -- pools
+            all 3 regimes together before computing each agent's skill, so
+            it can't see that an agent's relative skill is regime-dependent.
+        "regime": one weight set per (regime, horizon) cell within the
+            fold, from facts_mas.factor_attribution.compute_all_regime_weights
+            -- looked up per forecast origin by that origin's own regime
+            (classify_regime) and the horizon being forecast. Built to test
+            whether the 13wk hiking/cutting underperformance found under
+            "fold" mode (fused loses to naive: 8.77 vs 8.06 hiking, 14.31
+            vs 13.04 cutting) is fixable by giving the fusion layer
+            visibility into regime-dependent skill shifts (see
+            factor_attribution.py's module docstring for the full
+            diagnosis -- AR weakens but doesn't go negative in hiking,
+            Seasonality overtakes AR at 13wk in cutting/stable).
+        "adaptive" (DEFAULT, production method): for each fold and horizon
+            INDEPENDENTLY, evaluates both "fold" and "regime" on that fold's
+            own validation window (never the test window -- see
+            factor_attribution.evaluate_validation_mape) and picks whichever
+            scored lower MAPE there, per horizon. Full 15x6x3 comparison
+            found this captures regime-aware's 13wk gains (fixing both
+            originally-failing cells) while matching fold-level exactly at
+            4wk -- but pooling all 3 regimes into one per-horizon choice
+            leaves one known gap: at 8wk/hiking, the pooled comparison
+            favors "regime" even though "fold" is actually better within
+            hiking specifically.
+        "adaptive_granular": same idea as "adaptive" but selects per (fold,
+            horizon, REGIME) instead of per (fold, horizon), intended to
+            close the 8wk/hiking gap. It DOES close that gap, but a full
+            validation found it is NOT a strict improvement -- it regresses
+            3 other cells (8wk/cutting, 13wk/hiking, 13wk/cutting -- the
+            last back to fold-level's original failing value), traced to
+            rare-regime validation windows returning zero data points
+            (fold_val_mape=regime_val_mape=inf) and silently defaulting to
+            "fold" rather than falling back to the pooled "adaptive"
+            decision. Kept available as a documented, partially-working
+            experiment with a known, scoped fix (data-sufficiency fallback,
+            not yet implemented) -- NOT the production default. See
+            factor_attribution.md for the full diagnosis, all four modes'
+            results, and the auto-generated gating rules.
+    All four modes kept as named alternatives specifically so they can be
+    run side by side, not just replaced.
+
     Args:
         df: aligned_weekly.csv with 'date' as datetime.
         agent_runners: {agent_name: callable(df, msa, origin, horizon) -> AgentOutput}
@@ -251,6 +294,7 @@ def run_backtest(
 
     results = []
     weight_log = []
+    mode_selection_log = []  # auditable record of adaptive/adaptive_granular's choices
 
     for fold in folds:
         # 1. Validate embargo
