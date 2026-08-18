@@ -1,0 +1,211 @@
+source,target,best_lag,p_value,significant,n_obs
+Atlanta,Boston,2,1.0,False,105
+Atlanta,Chicago,2,1.0,False,105
+Atlanta,Dallas,1,0.8401933225014421,False,105
+Atlanta,Detroit,6,0.06244295128713482,False,105
+Atlanta,Houston,4,1.0,False,105
+Atlanta,Los Angeles,3,0.026177170276813676,False,105
+Atlanta,Miami,1,1.0,False,105
+Atlanta,New York,3,0.3095039893964666,False,105
+Atlanta,Philadelphia,8,0.08551622143518829,False,105
+Atlanta,Phoenix,1,0.4226475588047992,False,105
+Atlanta,Riverside,2,1.0,False,105
+Atlanta,San Francisco,6,1.0,False,105
+Atlanta,Seattle,8,0.2586900697603582,False,105
+Atlanta,Washington DC,4,0.2271699021564714,False,105
+Boston,Atlanta,4,0.10384208293041441,False,105
+Boston,Chicago,3,0.006606876300115198,True,105
+Boston,Dallas,1,0.02573442232410734,False,105
+Boston,Detroit,8,0.037020426649091165,False,105
+Boston,Houston,3,0.37903369970462464,False,105
+Boston,Los Angeles,3,0.920399734490966,False,105
+Boston,Miami,4,0.0017178461950425182,True,105
+Boston,New York,3,3.9027517924163167e-07,True,105
+Boston,Philadelphia,3,0.17202269508344592,False,105
+Boston,Phoenix,5,1.0,False,105
+Boston,Riverside,8,0.22167924631317787,False,105
+Boston,San Francisco,8,0.008630066597674624,True,105
+Boston,Seattle,3,0.47311092605553035,False,105
+Boston,Washington DC,4,0.003352596084484454,True,105
+Chicago,Atlanta,2,1.0,False,105
+Chicago,Boston,4,0.5873393460468272,False,105
+Chicago,Dallas,3,0.06324182740730006,False,105
+Chicago,Detroit,8,0.9029667798118588,False,105
+Chicago,Houston,4,0.39538042233316484,False,105
+Chicago,Los Angeles,3,0.15061412280647943,False,105
+Chicago,Miami,4,0.16979028889882786,False,105
+Chicago,New York,1,0.511547088166819,False,105
+Chicago,Philadelphia,1,0.6697070898930189,False,105
+Chicago,Phoenix,4,0.21086850284627567,False,105
+Chicago,Riverside,4,1.0,False,105
+Chicago,San Francisco,4,0.41946015701241385,False,105
+Chicago,Seattle,3,0.004511900645514385,True,105
+Chicago,Washington DC,4,1.0,False,105
+Dallas,Atlanta,1,0.13995094488065815,False,105
+Dallas,Boston,2,0.3893259957695288,False,105
+Dallas,Chicago,4,0.0017801865524623322,True,105
+Dallas,Detroit,6,1.0,False,105
+Dallas,Houston,4,0.025731451612702513,False,105
+Dallas,Los Angeles,2,0.2593733643584313,False,105
+Dallas,Miami,3,1.0,False,105
+Dallas,New York,3,0.00981215076645162,True,105
+Dallas,Philadelphia,3,0.549591625359884,False,105
+Dallas,Phoenix,5,1.0,False,105
+Dallas,Riverside,1,1.0,False,105
+Dallas,San Francisco,8,0.4784463180738452,False,105
+Dallas,Seattle,5,0.10486300081486481,False,105
+Dallas,Washington DC,3,0.1585750730288332,False,105
+Detroit,Atlanta,3,0.08735865319986125,False,105
+Detroit,Boston,3,0.14580008058773705,False,105
+Detroit,Chicago,4,0.6178751316889146,False,105
+Detroit,Dallas,3,0.46939341379426935,False,105
+Detroit,Houston,3,0.009090935489023991,True,105
+Detroit,Los Angeles,6,1.0,False,105
+Detroit,Miami,1,0.012732827439049313,False,105
+Detroit,New York,8,1.0,False,105
+Detroit,Philadelphia,4,0.37056202577033776,False,105
+Detroit,Phoenix,2,0.19506474591517572,False,105
+Detroit,Riverside,3,0.017061302174764124,False,105
+Detroit,San Francisco,2,1.0,False,105
+Detroit,Seattle,3,0.007912785738107511,True,105
+Detroit,Washington DC,1,0.007296951019988578,True,105
+Houston,Atlanta,8,0.00628435359473118,True,105
+Houston,Boston,6,0.5014321266860262,False,105
+Houston,Chicago,3,0.03831290622396874,False,105
+Houston,Dallas,6,1.0,False,105
+Houston,Detroit,3,0.09066747373069904,False,105
+Houston,Los Angeles,4,0.7316859954752274,False,105
+Houston,Miami,4,0.020089555007343864,False,105
+Houston,New York,3,2.6678822547227905e-05,True,105
+Houston,Philadelphia,3,0.020007501492580747,False,105
+Houston,Phoenix,8,1.0,False,105
+Houston,Riverside,4,0.5575809337901377,False,105
+Houston,San Francisco,8,0.00015021431192871782,True,105
+Houston,Seattle,5,0.01021085989082708,True,105
+Houston,Washington DC,3,0.23927241435870814,False,105
+Los Angeles,Atlanta,4,1.0,False,105
+Los Angeles,Boston,1,0.8500545418984099,False,105
+Los Angeles,Chicago,3,0.11068151478273339,False,105
+Los Angeles,Dallas,1,0.4779409839167753,False,105
+Los Angeles,Detroit,4,0.6018935654943322,False,105
+Los Angeles,Houston,4,1.0,False,105
+Los Angeles,Miami,3,1.0,False,105
+Los Angeles,New York,3,0.2724529313133437,False,105
+Los Angeles,Philadelphia,2,0.004736655940508114,True,105
+Los Angeles,Phoenix,8,1.0,False,105
+Los Angeles,Riverside,8,1.0,False,105
+Los Angeles,San Francisco,4,0.03994929413733947,False,105
+Los Angeles,Seattle,2,1.0,False,105
+Los Angeles,Washington DC,2,0.7843517488990491,False,105
+Miami,Atlanta,4,0.007473017886559315,True,105
+Miami,Boston,3,0.023422331717013623,False,105
+Miami,Chicago,3,0.00017966648347214598,True,105
+Miami,Dallas,1,1.0,False,105
+Miami,Detroit,3,0.003053686241521199,True,105
+Miami,Houston,4,0.1278116270143757,False,105
+Miami,Los Angeles,8,0.8680114288326584,False,105
+Miami,New York,3,7.778549055662027e-07,True,105
+Miami,Philadelphia,3,0.009826660677955032,True,105
+Miami,Phoenix,8,0.6237988550742709,False,105
+Miami,Riverside,3,0.013549429131262189,False,105
+Miami,San Francisco,8,0.0015740735453512956,True,105
+Miami,Seattle,5,0.05181403798963269,False,105
+Miami,Washington DC,8,0.12032773373193163,False,105
+New York,Atlanta,3,1.0,False,105
+New York,Boston,3,0.002510529630166837,True,105
+New York,Chicago,3,0.012483218756750321,False,105
+New York,Dallas,1,0.4591881219346399,False,105
+New York,Detroit,2,0.4970292348514591,False,105
+New York,Houston,3,0.02295363126790027,False,105
+New York,Los Angeles,8,0.05661587520519844,False,105
+New York,Miami,3,0.005999593110593297,True,105
+New York,Philadelphia,6,1.0,False,105
+New York,Phoenix,3,0.002987512142117188,True,105
+New York,Riverside,3,0.002905006973824571,True,105
+New York,San Francisco,3,0.4834795401735977,False,105
+New York,Seattle,3,4.631990894571482e-05,True,105
+New York,Washington DC,3,0.49714725110373914,False,105
+Philadelphia,Atlanta,4,1.0,False,105
+Philadelphia,Boston,3,0.7045552651081772,False,105
+Philadelphia,Chicago,5,0.29709924139031463,False,105
+Philadelphia,Dallas,2,0.38573075174286525,False,105
+Philadelphia,Detroit,2,1.0,False,105
+Philadelphia,Houston,2,0.005354851055577956,True,105
+Philadelphia,Los Angeles,4,0.17991263718923348,False,105
+Philadelphia,Miami,1,0.07217775705983615,False,105
+Philadelphia,New York,2,0.7403897477138777,False,105
+Philadelphia,Phoenix,1,0.5331566144490979,False,105
+Philadelphia,Riverside,1,0.7919193431176318,False,105
+Philadelphia,San Francisco,6,1.0,False,105
+Philadelphia,Seattle,1,0.034766639264354186,False,105
+Philadelphia,Washington DC,1,0.19226271042783424,False,105
+Phoenix,Atlanta,4,0.49666917931130394,False,105
+Phoenix,Boston,8,1.0,False,105
+Phoenix,Chicago,8,0.23658962982776433,False,105
+Phoenix,Dallas,2,0.7137692323636686,False,105
+Phoenix,Detroit,1,0.5245877000695819,False,105
+Phoenix,Houston,2,0.023999794732685476,False,105
+Phoenix,Los Angeles,2,0.07927211433710289,False,105
+Phoenix,Miami,2,0.0071997425195445795,True,105
+Phoenix,New York,3,0.000226864891806206,True,105
+Phoenix,Philadelphia,6,1.0,False,105
+Phoenix,Riverside,8,0.2020094512106893,False,105
+Phoenix,San Francisco,8,0.7502182481215496,False,105
+Phoenix,Seattle,2,1.0,False,105
+Phoenix,Washington DC,4,1.0,False,105
+Riverside,Atlanta,4,0.006283306932150746,True,105
+Riverside,Boston,6,0.06832557434295485,False,105
+Riverside,Chicago,3,0.03398964756832425,False,105
+Riverside,Dallas,1,0.42437771732901713,False,105
+Riverside,Detroit,3,0.028747699783157533,False,105
+Riverside,Houston,3,1.0,False,105
+Riverside,Los Angeles,3,0.22573759771392968,False,105
+Riverside,Miami,3,0.020198630935877177,False,105
+Riverside,New York,3,5.716821940715586e-05,True,105
+Riverside,Philadelphia,3,0.2075176903497748,False,105
+Riverside,Phoenix,1,0.1520918809259936,False,105
+Riverside,San Francisco,8,1.0,False,105
+Riverside,Seattle,1,1.0,False,105
+Riverside,Washington DC,3,0.0004173527079283254,True,105
+San Francisco,Atlanta,2,8.937813787065338e-05,True,105
+San Francisco,Boston,1,0.00011601477490769513,True,105
+San Francisco,Chicago,2,0.04359082492007197,False,105
+San Francisco,Dallas,2,0.42111695686473716,False,105
+San Francisco,Detroit,7,1.0,False,105
+San Francisco,Houston,2,6.53050448927669e-05,True,105
+San Francisco,Los Angeles,4,0.0070228581994521,True,105
+San Francisco,Miami,1,0.0006114443783053167,True,105
+San Francisco,New York,8,0.07433348993278632,False,105
+San Francisco,Philadelphia,3,0.04033093094224035,False,105
+San Francisco,Phoenix,2,1.0,False,105
+San Francisco,Riverside,5,0.08913778382349528,False,105
+San Francisco,Seattle,2,0.2104332363596911,False,105
+San Francisco,Washington DC,3,0.00032757631465183014,True,105
+Seattle,Atlanta,4,0.09003680545161401,False,105
+Seattle,Boston,1,1.0,False,105
+Seattle,Chicago,3,0.0008996385735175069,True,105
+Seattle,Dallas,4,1.0,False,105
+Seattle,Detroit,3,0.09557360485129172,False,105
+Seattle,Houston,4,0.060402934811847976,False,105
+Seattle,Los Angeles,1,1.0,False,105
+Seattle,Miami,5,0.03029288347316385,False,105
+Seattle,New York,3,2.5838093328181966e-09,True,105
+Seattle,Philadelphia,6,0.5472593343864766,False,105
+Seattle,Phoenix,1,1.0,False,105
+Seattle,Riverside,8,0.6701163863807382,False,105
+Seattle,San Francisco,8,0.0964885492430701,False,105
+Seattle,Washington DC,4,0.17512112537763483,False,105
+Washington DC,Atlanta,4,0.006093154556200255,True,105
+Washington DC,Boston,4,0.0031139512639266845,True,105
+Washington DC,Chicago,3,0.03513757554269091,False,105
+Washington DC,Dallas,4,0.43442521649213595,False,105
+Washington DC,Detroit,1,0.6500694416551842,False,105
+Washington DC,Houston,2,0.7034402836855148,False,105
+Washington DC,Los Angeles,4,1.0,False,105
+Washington DC,Miami,4,0.6260901531106988,False,105
+Washington DC,New York,3,0.7364614279587529,False,105
+Washington DC,Philadelphia,7,0.39890451941980654,False,105
+Washington DC,Phoenix,4,0.4052951002522181,False,105
+Washington DC,Riverside,3,0.01315719814542527,False,105
+Washington DC,San Francisco,8,0.4607580610505322,False,105
+Washington DC,Seattle,4,0.5708356517722287,False,105

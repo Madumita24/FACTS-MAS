@@ -1,0 +1,3 @@
+system,forecasts,llm_calls,calls_per_forecast,usd_total,usd_per_1k_forecasts,llm_hours,note
+FACTS-MAS (ours),15480,153,0.009883720930232558,0.031,0.0020025839793281655,0.1445,"LLM used only by ['event']; cached per declaration, not per forecast"
+NEXUS-style CoT,15480,15480,1.0,3.9540229885057476,0.2554278416347382,14.62,one call per forecast; scales linearly with origins x horizons

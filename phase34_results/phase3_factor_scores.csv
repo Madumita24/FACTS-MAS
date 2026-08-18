@@ -1,0 +1,181 @@
+msa,factor,horizon,rolling_corr,granger_p,granger_lag,granger_sig
+Atlanta,mortgage_rate,4,0.1999620977975537,0.8456769504426177,1,False
+Atlanta,fed_funds,4,0.8682698860906085,1.0,6,False
+Atlanta,cpi,4,-0.5646094974804099,1.0,7,False
+Atlanta,unemployment,4,-0.49007535506785516,1.0,4,False
+Atlanta,mortgage_rate,8,0.3032749306204526,0.8456769504426177,1,False
+Atlanta,fed_funds,8,0.813274477375905,1.0,6,False
+Atlanta,cpi,8,-0.37816538353202706,1.0,7,False
+Atlanta,unemployment,8,-0.34096552804065977,1.0,4,False
+Atlanta,mortgage_rate,13,0.17676005173581114,0.8456769504426177,1,False
+Atlanta,fed_funds,13,0.5573249520360526,1.0,6,False
+Atlanta,cpi,13,-0.10806191018678658,1.0,7,False
+Atlanta,unemployment,13,-0.43757069304787183,1.0,4,False
+Boston,mortgage_rate,4,0.16498886804343152,0.03474888876356473,4,True
+Boston,fed_funds,4,0.754984200773389,1.0,3,False
+Boston,cpi,4,-0.5762545883628541,1.0,8,False
+Boston,unemployment,4,-0.4241711148101845,1.0,6,False
+Boston,mortgage_rate,8,0.2985998020785395,0.03474888876356473,4,True
+Boston,fed_funds,8,0.7720658590510614,1.0,3,False
+Boston,cpi,8,-0.500696019120412,1.0,8,False
+Boston,unemployment,8,-0.3729627472670027,1.0,6,False
+Boston,mortgage_rate,13,0.2230841247780057,0.03474888876356473,4,True
+Boston,fed_funds,13,0.581724142335329,1.0,3,False
+Boston,cpi,13,-0.29167602272995685,1.0,8,False
+Boston,unemployment,13,-0.5342926147094931,1.0,6,False
+Chicago,mortgage_rate,4,0.19811596870007597,0.14978664720917859,4,False
+Chicago,fed_funds,4,0.86118696351941,1.0,8,False
+Chicago,cpi,4,-0.4702850311493544,1.0,8,False
+Chicago,unemployment,4,-0.35117003619863846,1.0,1,False
+Chicago,mortgage_rate,8,0.3493755327884877,0.14978664720917859,4,False
+Chicago,fed_funds,8,0.8082070611721802,1.0,8,False
+Chicago,cpi,8,-0.25870250824404173,1.0,8,False
+Chicago,unemployment,8,-0.22037170518729618,1.0,1,False
+Chicago,mortgage_rate,13,0.2400638730199466,0.14978664720917859,4,False
+Chicago,fed_funds,13,0.5546055248214192,1.0,8,False
+Chicago,cpi,13,0.05647393135216092,1.0,8,False
+Chicago,unemployment,13,-0.32390774067671074,1.0,1,False
+Dallas,mortgage_rate,4,0.4386355531127993,1.0,1,False
+Dallas,fed_funds,4,0.7712821087284852,1.0,3,False
+Dallas,cpi,4,-0.5267598358300413,1.0,5,False
+Dallas,unemployment,4,-0.5879221172365768,1.0,3,False
+Dallas,mortgage_rate,8,0.49208012798059847,1.0,1,False
+Dallas,fed_funds,8,0.7037380794459144,1.0,3,False
+Dallas,cpi,8,-0.3500238021501202,1.0,5,False
+Dallas,unemployment,8,-0.43988419271477813,1.0,3,False
+Dallas,mortgage_rate,13,0.2963832675711876,1.0,1,False
+Dallas,fed_funds,13,0.49557157835062415,1.0,3,False
+Dallas,cpi,13,-0.15654664668825188,1.0,5,False
+Dallas,unemployment,13,-0.5218770363361056,1.0,3,False
+Detroit,mortgage_rate,4,0.2944381799202697,1.0,1,False
+Detroit,fed_funds,4,0.7517326007190901,0.9837880985462933,6,False
+Detroit,cpi,4,-0.28332016917904934,1.0,8,False
+Detroit,unemployment,4,-0.17345640745380014,1.0,1,False
+Detroit,mortgage_rate,8,0.38308857885375236,1.0,1,False
+Detroit,fed_funds,8,0.6946333648259795,0.9837880985462933,6,False
+Detroit,cpi,8,-0.06038163107584561,1.0,8,False
+Detroit,unemployment,8,-0.055292049285485846,1.0,1,False
+Detroit,mortgage_rate,13,0.20080236279045796,1.0,1,False
+Detroit,fed_funds,13,0.4636030051766929,0.9837880985462933,6,False
+Detroit,cpi,13,0.21919011710482567,1.0,8,False
+Detroit,unemployment,13,-0.17485718032575476,1.0,1,False
+Houston,mortgage_rate,4,0.4458931758922638,0.07336275412107218,1,False
+Houston,fed_funds,4,0.7482407567877731,1.0,5,False
+Houston,cpi,4,-0.6024408710376176,1.0,5,False
+Houston,unemployment,4,-0.6401356018651692,1.0,2,False
+Houston,mortgage_rate,8,0.4355997240964478,0.07336275412107218,1,False
+Houston,fed_funds,8,0.671371488091158,1.0,5,False
+Houston,cpi,8,-0.42822796232419136,1.0,5,False
+Houston,unemployment,8,-0.48313235332425547,1.0,2,False
+Houston,mortgage_rate,13,0.1816695273951097,0.07336275412107218,1,False
+Houston,fed_funds,13,0.4533045499912071,1.0,5,False
+Houston,cpi,13,-0.22434016253993358,1.0,5,False
+Houston,unemployment,13,-0.5659785365130046,1.0,2,False
+Los Angeles,mortgage_rate,4,0.33128416216001483,1.0,4,False
+Los Angeles,fed_funds,4,0.7782314478559009,1.0,6,False
+Los Angeles,cpi,4,-0.5174577159360038,1.0,6,False
+Los Angeles,unemployment,4,-0.44602712860002963,1.0,1,False
+Los Angeles,mortgage_rate,8,0.4764536763548324,1.0,4,False
+Los Angeles,fed_funds,8,0.790614545788825,1.0,6,False
+Los Angeles,cpi,8,-0.39747782595388675,1.0,6,False
+Los Angeles,unemployment,8,-0.397395496753794,1.0,1,False
+Los Angeles,mortgage_rate,13,0.37876446875038705,1.0,4,False
+Los Angeles,fed_funds,13,0.553504128092717,1.0,6,False
+Los Angeles,cpi,13,-0.14585098393514628,1.0,6,False
+Los Angeles,unemployment,13,-0.5142725411587685,1.0,1,False
+Miami,mortgage_rate,4,-0.36285248225322736,1.0,1,False
+Miami,fed_funds,4,-0.12927498695326978,0.7157378353668563,4,False
+Miami,cpi,4,-0.3322804509942429,0.45618373938754786,6,False
+Miami,unemployment,4,-0.18855549202157101,1.0,4,False
+Miami,mortgage_rate,8,-0.43927354097454235,1.0,1,False
+Miami,fed_funds,8,-0.09728210841458412,0.7157378353668563,4,False
+Miami,cpi,8,-0.46606105918387475,0.45618373938754786,6,False
+Miami,unemployment,8,-0.21822850870530802,1.0,4,False
+Miami,mortgage_rate,13,-0.025901883591872975,1.0,1,False
+Miami,fed_funds,13,-0.1019738603945855,0.7157378353668563,4,False
+Miami,cpi,13,-0.5691276030271063,0.45618373938754786,6,False
+Miami,unemployment,13,-0.08116159473318747,1.0,4,False
+New York,mortgage_rate,4,0.2683146424302106,0.38950126885965647,4,False
+New York,fed_funds,4,0.7788030631145377,1.0,3,False
+New York,cpi,4,-0.6869327837643538,1.0,5,False
+New York,unemployment,4,-0.6065104014569429,1.0,4,False
+New York,mortgage_rate,8,0.33128661357491657,0.38950126885965647,4,False
+New York,fed_funds,8,0.7452524128952791,1.0,3,False
+New York,cpi,8,-0.5668112219007008,1.0,5,False
+New York,unemployment,8,-0.50350784072358,1.0,4,False
+New York,mortgage_rate,13,0.18110952284584456,0.38950126885965647,4,False
+New York,fed_funds,13,0.5263433738244199,1.0,3,False
+New York,cpi,13,-0.3399863338559276,1.0,5,False
+New York,unemployment,13,-0.6122077100206339,1.0,4,False
+Philadelphia,mortgage_rate,4,0.09310370430733457,0.13114452239410004,4,False
+Philadelphia,fed_funds,4,0.8591668447245424,1.0,6,False
+Philadelphia,cpi,4,-0.5155492516480654,1.0,8,False
+Philadelphia,unemployment,4,-0.36057791786556703,1.0,1,False
+Philadelphia,mortgage_rate,8,0.18163264355407727,0.13114452239410004,4,False
+Philadelphia,fed_funds,8,0.8349384265220724,1.0,6,False
+Philadelphia,cpi,8,-0.3195115759031694,1.0,8,False
+Philadelphia,unemployment,8,-0.20768897203566544,1.0,1,False
+Philadelphia,mortgage_rate,13,0.09894812436472517,0.13114452239410004,4,False
+Philadelphia,fed_funds,13,0.554931505468965,1.0,6,False
+Philadelphia,cpi,13,0.005261101591603432,1.0,8,False
+Philadelphia,unemployment,13,-0.32554910074528726,1.0,1,False
+Phoenix,mortgage_rate,4,-0.57220700335182,1.0,1,False
+Phoenix,fed_funds,4,0.2915417767973618,1.0,4,False
+Phoenix,cpi,4,-0.2911196173211174,1.0,6,False
+Phoenix,unemployment,4,0.009505314625746443,1.0,2,False
+Phoenix,mortgage_rate,8,-0.6455723812875434,1.0,1,False
+Phoenix,fed_funds,8,0.4421271799162833,1.0,4,False
+Phoenix,cpi,8,-0.19175488892182327,1.0,6,False
+Phoenix,unemployment,8,0.19242907412091542,1.0,2,False
+Phoenix,mortgage_rate,13,-0.5825288887813278,1.0,1,False
+Phoenix,fed_funds,13,0.1488972424205732,1.0,4,False
+Phoenix,cpi,13,0.20154134282530228,1.0,6,False
+Phoenix,unemployment,13,0.2858657496948039,1.0,2,False
+Riverside,mortgage_rate,4,0.10537291737080623,1.0,1,False
+Riverside,fed_funds,4,0.7399163687008314,1.0,4,False
+Riverside,cpi,4,-0.3680788330184151,0.5710534829829752,6,False
+Riverside,unemployment,4,-0.3038938371866565,1.0,1,False
+Riverside,mortgage_rate,8,0.15583460522013945,1.0,1,False
+Riverside,fed_funds,8,0.7551321474960472,1.0,4,False
+Riverside,cpi,8,-0.19527070275545633,0.5710534829829752,6,False
+Riverside,unemployment,8,-0.12268119289183953,1.0,1,False
+Riverside,mortgage_rate,13,0.038042934782434874,1.0,1,False
+Riverside,fed_funds,13,0.47532230009177423,1.0,4,False
+Riverside,cpi,13,0.11034089344604034,0.5710534829829752,6,False
+Riverside,unemployment,13,-0.2097364452769683,1.0,1,False
+San Francisco,mortgage_rate,4,0.17993844576029172,0.31239719530681564,4,False
+San Francisco,fed_funds,4,0.7366994034868958,1.0,3,False
+San Francisco,cpi,4,-0.6588754857680434,1.0,6,False
+San Francisco,unemployment,4,-0.4842572831914009,1.0,6,False
+San Francisco,mortgage_rate,8,0.3287897131569407,0.31239719530681564,4,False
+San Francisco,fed_funds,8,0.7648075151057977,1.0,3,False
+San Francisco,cpi,8,-0.6092842788295548,1.0,6,False
+San Francisco,unemployment,8,-0.4720862974452384,1.0,6,False
+San Francisco,mortgage_rate,13,0.2540642656345852,0.31239719530681564,4,False
+San Francisco,fed_funds,13,0.5713464268314834,1.0,3,False
+San Francisco,cpi,13,-0.3867850963931606,1.0,6,False
+San Francisco,unemployment,13,-0.6318621661721585,1.0,6,False
+Seattle,mortgage_rate,4,0.47682712766120916,0.06712386513926591,4,False
+Seattle,fed_funds,4,0.7384969293655593,1.0,3,False
+Seattle,cpi,4,-0.5679757856721622,1.0,5,False
+Seattle,unemployment,4,-0.5404582337600237,1.0,4,False
+Seattle,mortgage_rate,8,0.5844692043694707,0.06712386513926591,4,False
+Seattle,fed_funds,8,0.702874708006472,1.0,3,False
+Seattle,cpi,8,-0.46358315439463615,1.0,5,False
+Seattle,unemployment,8,-0.501910812438895,1.0,4,False
+Seattle,mortgage_rate,13,0.39825256480568005,0.06712386513926591,4,False
+Seattle,fed_funds,13,0.5211150282156763,1.0,3,False
+Seattle,cpi,13,-0.27334319426419224,1.0,5,False
+Seattle,unemployment,13,-0.6289770202786961,1.0,4,False
+Washington DC,mortgage_rate,4,0.192855059102249,0.33481224593532327,4,False
+Washington DC,fed_funds,4,0.8233368286484203,1.0,1,False
+Washington DC,cpi,4,-0.6278408428492558,0.189571235253091,8,False
+Washington DC,unemployment,4,-0.4972809809236386,1.0,1,False
+Washington DC,mortgage_rate,8,0.2734321482352288,0.33481224593532327,4,False
+Washington DC,fed_funds,8,0.793981375060141,1.0,1,False
+Washington DC,cpi,8,-0.4833213659171063,0.189571235253091,8,False
+Washington DC,unemployment,8,-0.38157806266457,1.0,1,False
+Washington DC,mortgage_rate,13,0.15880605864434424,0.33481224593532327,4,False
+Washington DC,fed_funds,13,0.5512588713347552,1.0,1,False
+Washington DC,cpi,13,-0.22343046817559942,0.189571235253091,8,False
+Washington DC,unemployment,13,-0.5158105444744514,1.0,1,False
