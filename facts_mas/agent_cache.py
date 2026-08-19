@@ -91,11 +91,35 @@ class AgentCache:
 
     # ── Views ─────────────────────────────────────────────────────────────
 
-    def cells(self, horizon: Optional[int] = None) -> list[CacheEntry]:
-        vals = self.entries.values()
-        if horizon is None:
-            return list(vals)
-        return [e for e in vals if e.horizon == horizon]
+    def cells(
+        self,
+        horizon: Optional[int] = None,
+        test_only: bool = False,
+        folds: Optional[list] = None,
+    ) -> list[CacheEntry]:
+        """
+        Cached cells, optionally restricted to fold TEST windows.
+
+        The cache deliberately covers validation windows too, because
+        compute_fold_weights and the mode-selection comparison walk those.
+        But an ablation or an accuracy report must not be scored on them:
+        those are the origins the fusion weights were fitted on, so
+        including them flatters every variant and flatters most the ones
+        whose weights were tuned hardest.
+
+        The gap is not small. At the 13-week horizon roughly half the
+        cached cells sit in validation windows, so a report over everything
+        is half in-sample. `test_only=True` is the correct setting for any
+        number that leaves the repo.
+        """
+        vals = list(self.entries.values())
+        if horizon is not None:
+            vals = [e for e in vals if e.horizon == horizon]
+        if test_only:
+            spans = [(f.test_start, f.test_end) for f in (folds or FOLDS)]
+            vals = [e for e in vals
+                    if any(a <= e.origin <= b for a, b in spans)]
+        return vals
 
     def msas(self) -> list[str]:
         return sorted({e.msa for e in self.entries.values()})

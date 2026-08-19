@@ -109,6 +109,7 @@ def run_ablation_table(
     weights_by_cell: Callable,
     fold_weights_by_cell: Optional[Callable] = None,
     horizons: Optional[list[int]] = None,
+    test_only: bool = True,
 ) -> pd.DataFrame:
     """
     Every ablation variant at every horizon.
@@ -125,7 +126,7 @@ def run_ablation_table(
     rows: list[AblationRow] = []
 
     for horizon in horizons:
-        cells = cache.cells(horizon)
+        cells = cache.cells(horizon, test_only=test_only)
         if not cells:
             continue
 
@@ -211,6 +212,7 @@ def shock_vs_normal(
     weights_by_cell: Callable,
     shock_lookup: Callable[[str, datetime.date], bool],
     horizons: Optional[list[int]] = None,
+    test_only: bool = True,
 ) -> pd.DataFrame:
     """
     Does the system hold up when something is actually happening?
@@ -226,7 +228,7 @@ def shock_vs_normal(
     horizons = horizons or HORIZONS
     rows = []
     for horizon in horizons:
-        cells = cache.cells(horizon)
+        cells = cache.cells(horizon, test_only=test_only)
         for label, want in (("shock", True), ("normal", False)):
             sel = [e for e in cells if shock_lookup(e.msa, e.origin) is want]
             if not sel:
@@ -251,6 +253,7 @@ def cross_msa_generalization(
     cache,
     weights_by_cell: Callable,
     horizons: Optional[list[int]] = None,
+    test_only: bool = True,
 ) -> pd.DataFrame:
     """
     Per-MSA performance, and how uneven it is.
@@ -267,7 +270,7 @@ def cross_msa_generalization(
     horizons = horizons or HORIZONS
     rows = []
     for horizon in horizons:
-        cells = cache.cells(horizon)
+        cells = cache.cells(horizon, test_only=test_only)
         for msa in sorted({e.msa for e in cells}):
             sel = [e for e in cells if e.msa == msa]
             fused = [compute_mape(e.actuals, fuse_entry(e, weights_by_cell(e)))
@@ -295,6 +298,7 @@ def agent_contribution_by_horizon(
     cache,
     weights_by_cell: Callable,
     horizons: Optional[list[int]] = None,
+    test_only: bool = True,
 ) -> pd.DataFrame:
     """
     Each agent's marginal value, per horizon, by three measures at once.
@@ -317,7 +321,7 @@ def agent_contribution_by_horizon(
     horizons = horizons or HORIZONS
     rows = []
     for horizon in horizons:
-        cells = cache.cells(horizon)
+        cells = cache.cells(horizon, test_only=test_only)
         if not cells:
             continue
         base = float(np.mean([compute_mape(e.actuals, fuse_entry(e, weights_by_cell(e)))

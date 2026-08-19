@@ -75,7 +75,20 @@ def build_spatial_graph(
 
     edges: list[GrangerEdge] = []
     for r in results:
-        significant = r.p_value < significance and r.best_lag >= 1
+        # Use the screen's OWN significance flag, which already carries the
+        # Benjamini-Hochberg correction across all 210 ordered pairs.
+        #
+        # This line previously re-derived significance as `p_value < 0.05`,
+        # which silently threw that correction away: the screen returned 43
+        # FDR-surviving edges and this function then re-admitted every edge
+        # whose raw p-value cleared 0.05, giving 67. The corrected count was
+        # only ever visible when calling granger_spillover_graph directly,
+        # never through the graph the system actually uses. Caught by
+        # Madumita reproducing the edge count independently.
+        #
+        # best_lag >= 1 is still required: the screen reports lag 0 when no
+        # lag was significant, and GrangerEdge requires a positive lag.
+        significant = r.significant and r.best_lag >= 1
         edges.append(GrangerEdge(
             source_msa_id=r.source,
             target_msa_id=r.target,
