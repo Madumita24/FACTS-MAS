@@ -1,0 +1,61 @@
+# FACTS-MAS pinned environment
+#
+# These are the exact versions that produce every number reported in the
+# paper. Pinned rather than floored because the project had no environment
+# file at all for most of its life, which is how the two of us ended up on
+# incompatible NumPy majors and a committed cache stopped loading on one
+# machine.
+#
+#   python -m venv .venv && .venv/Scripts/activate   (Windows)
+#   pip install -r requirements.txt
+#
+# Verified on Python 3.11.13, Windows. All 159 tests pass, and the numerical
+# fingerprint (seasonal factors, Ridge coefficients, ETS forecasts, Granger
+# edge count) is bit-identical to the NumPy 1.26 / pandas 2.0 stack the
+# earlier results were produced under, so the upgrade changed no result.
+
+# ── Core numerics ─────────────────────────────────────────────────────────
+numpy==2.4.6
+pandas==3.0.6
+scipy==1.17.1
+
+# ── Models ────────────────────────────────────────────────────────────────
+# statsmodels: Holt-Winters ETS (temporal channel) and the Granger
+#   causality tests behind the spatial spillover graph.
+# scikit-learn: Ridge + StandardScaler for the exogenous and intrinsic
+#   channels.
+# linearmodels: two-way fixed-effects panel regression used in the
+#   exogenous-channel null validation.
+statsmodels==0.15.0
+scikit-learn==1.9.1
+linearmodels==7.0
+
+# ── Contracts and validation ──────────────────────────────────────────────
+# pydantic backs the shared agent output contract, so its version is
+# load-bearing: the horizon-length, non-negativity and confidence-range
+# checks are enforced at construction time by these models.
+pydantic==2.13.5
+
+# ── Data acquisition ──────────────────────────────────────────────────────
+# fredapi: FRED macro series. requests: Zillow, OpenFEMA, NOAA pulls.
+# python-dotenv: API keys out of source.
+fredapi==0.5.2
+requests==2.34.2
+python-dotenv==1.2.3
+
+# ── LLM (event channel only) ──────────────────────────────────────────────
+# Used by the Event Agent's interpretation step and by the NEXUS-style
+# chain-of-thought baseline. Not required to run the housing backtest: the
+# event interpretations are cached in event_agent_weekly.csv, so no API key
+# is needed to reproduce the reported results.
+openai==3.19.2
+
+# ── Testing ───────────────────────────────────────────────────────────────
+pytest==9.1.1
+
+# ── Not pinned here ───────────────────────────────────────────────────────
+# timesfm is required only by timesfm_baseline.py, which reproduces the
+# fold-1 foundation-model comparison. It pulls a large torch dependency and
+# is not needed for any other result, so install it separately:
+#     pip install timesfm
+# The checkpoint used was google/timesfm-2.5-200m-pytorch.

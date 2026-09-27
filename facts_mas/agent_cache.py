@@ -41,20 +41,6 @@ from facts_mas.schema import AgentOutput
 
 DEFAULT_CACHE_PATH = "agent_output_cache.pkl"
 
-class _CompatUnpickler(pickle.Unpickler):
-    """Unpickler that accepts both NumPy 1.x and 2.x array module paths."""
-
-    def find_class(self, module, name):
-        if module.startswith("numpy._core"):
-            module = module.replace("numpy._core", "numpy.core", 1)
-        elif module.startswith("numpy.core"):
-            # The reverse direction, for a NumPy-1 cache read under NumPy 2.
-            try:
-                return super().find_class(module, name)
-            except (ModuleNotFoundError, AttributeError):
-                module = module.replace("numpy.core", "numpy._core", 1)
-        return super().find_class(module, name)
-
 
 LOOKBACK_WEEKS = 104
 
@@ -148,23 +134,8 @@ class AgentCache:
 
     @staticmethod
     def load(path: str = DEFAULT_CACHE_PATH) -> "AgentCache":
-        """
-        Load a cache, tolerating the NumPy 1.x / 2.x pickle split.
-
-        NumPy 2 renamed the private `numpy.core` package to `numpy._core`,
-        and pickled ndarrays record that path. A cache built under NumPy 2
-        therefore refuses to load under NumPy 1 with nothing but a
-        ModuleNotFoundError for `numpy._core.numeric` to explain it. Since
-        this cache is a shared artifact committed to the repo and rebuilding
-        it costs hours, both versions have to be able to read it.
-
-        Remapping at unpickle time rather than by patching sys.modules: the
-        rename is a pure path change onto the same classes, and doing it in
-        find_class keeps the fix local to this call instead of mutating
-        global import state for the rest of the process.
-        """
         with open(path, "rb") as fh:
-            return _CompatUnpickler(fh).load()
+            return pickle.load(fh)
 
     def summary(self) -> str:
         if not self.entries:
