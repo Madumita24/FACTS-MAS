@@ -11,7 +11,7 @@ Atlanta,Philadelphia,8,0.08551622143518829,False,105
 Atlanta,Phoenix,1,0.4226475588047992,False,105
 Atlanta,Riverside,2,1.0,False,105
 Atlanta,San Francisco,6,1.0,False,105
-Atlanta,Seattle,8,0.2586900697603582,False,105
+Atlanta,Seattle,8,0.258690069760357,False,105
 Atlanta,Washington DC,4,0.2271699021564714,False,105
 Boston,Atlanta,4,0.10384208293041441,False,105
 Boston,Chicago,3,0.006606876300115198,True,105
@@ -52,7 +52,7 @@ Dallas,New York,3,0.00981215076645162,True,105
 Dallas,Philadelphia,3,0.549591625359884,False,105
 Dallas,Phoenix,5,1.0,False,105
 Dallas,Riverside,1,1.0,False,105
-Dallas,San Francisco,8,0.4784463180738452,False,105
+Dallas,San Francisco,8,0.4784463180738484,False,105
 Dallas,Seattle,5,0.10486300081486481,False,105
 Dallas,Washington DC,3,0.1585750730288332,False,105
 Detroit,Atlanta,3,0.08735865319986125,False,105
@@ -69,7 +69,7 @@ Detroit,Riverside,3,0.017061302174764124,False,105
 Detroit,San Francisco,2,1.0,False,105
 Detroit,Seattle,3,0.007912785738107511,True,105
 Detroit,Washington DC,1,0.007296951019988578,True,105
-Houston,Atlanta,8,0.00628435359473118,True,105
+Houston,Atlanta,8,0.006284353594731206,True,105
 Houston,Boston,6,0.5014321266860262,False,105
 Houston,Chicago,3,0.03831290622396874,False,105
 Houston,Dallas,6,1.0,False,105
@@ -175,7 +175,7 @@ San Francisco,Detroit,7,1.0,False,105
 San Francisco,Houston,2,6.53050448927669e-05,True,105
 San Francisco,Los Angeles,4,0.0070228581994521,True,105
 San Francisco,Miami,1,0.0006114443783053167,True,105
-San Francisco,New York,8,0.07433348993278632,False,105
+San Francisco,New York,8,0.07433348993278607,False,105
 San Francisco,Philadelphia,3,0.04033093094224035,False,105
 San Francisco,Phoenix,2,1.0,False,105
 San Francisco,Riverside,5,0.08913778382349528,False,105
