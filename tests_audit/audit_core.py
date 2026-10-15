@@ -173,6 +173,7 @@ class FoldModel:
     regime_grid: dict          # regime -> h -> {"weights", "skills", "n"}
     mode: dict                 # h -> "fold" | "regime"
     val_mape: dict             # h -> (fold_mode_mape, regime_mode_mape)
+    horizon_weights: dict = field(default_factory=dict)   # h -> weights (horizon-only, regime-blind)
 
 
 def _in_val(cell: Cell, fold, bound_targets: bool) -> bool:
@@ -198,6 +199,7 @@ def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_v
     val = [c for c in cells if _in_val(c, fold, bound_targets) and not (exclude and exclude(c))]
 
     pooled = {a: [] for a in agents}
+    by_h = {h: {a: [] for a in agents} for h in HORIZONS}
     by_rh = {(r, h): {a: [] for a in agents} for r in REGIMES for h in HORIZONS}
     for c in val:
         nm = _mape_frac(c.actuals, c.naive)
@@ -210,9 +212,11 @@ def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_v
                 continue
             s = 1.0 - am / nm
             pooled[a].append(s)
+            by_h[c.h][a].append(s)
             by_rh[(c.regime, c.h)][a].append(s)
 
     fold_w = softmax({a: median_skill(pooled[a]) for a in agents}, temperature)
+    hz_w = {h: softmax({a: median_skill(by_h[h][a]) for a in agents}, temperature) for h in HORIZONS}
     weeks = {(r, h): set() for r in REGIMES for h in HORIZONS}
     for c in val:
         weeks[(c.regime, c.h)].add(c.origin)
@@ -250,7 +254,7 @@ def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_v
         rm = float(np.mean(ra)) if ra else float("inf")
         vm[h] = (fm, rm)
         mode[h] = "fold" if fm <= rm else "regime"
-    return FoldModel(fold.fold, fold_w, grid, mode, vm)
+    return FoldModel(fold.fold, fold_w, grid, mode, vm, hz_w)
 
 
 def build_models(cells, values_fn: ValuesFn = production_values, **kw) -> dict:
@@ -261,6 +265,8 @@ def weights_for(cell: Cell, models: dict, scheme: str = "adaptive") -> dict:
     m = models[cell.test_fold]
     if scheme == "fold":
         return m.fold_weights
+    if scheme == "horizon":
+        return m.horizon_weights[cell.h]
     if scheme == "regime" or (scheme == "adaptive" and m.mode[cell.h] == "regime"):
         return m.regime_grid[cell.regime][cell.h]["weights_eff"]
     return m.fold_weights
@@ -308,14 +314,16 @@ def test_cells(cells, horizon: Optional[int] = None, exclude_bleed: bool = False
 
 
 def score(cells, models, values_fn: ValuesFn = production_values, scheme: str = "adaptive",
-          exclude_bleed: bool = False, disclosure: bool = False) -> pd.DataFrame:
+          exclude_bleed: bool = False, disclosure: bool = False,
+          weights_fn: Optional[Callable[[Cell], dict]] = None) -> pd.DataFrame:
     """Per-cell MAPE for fused, naive and every standalone agent, test cells only."""
     tc = test_cells(cells, exclude_bleed=exclude_bleed)
     assert_scoring_allowed([d for c in tc for d in c.target_dates], disclosure=disclosure)
     rows = []
     for c in tc:
         vals = values_fn(c, c.test_fold)
-        fz = fuse(vals, weights_for(c, models, scheme), c.h)
+        w = weights_fn(c) if weights_fn else weights_for(c, models, scheme)
+        fz = fuse(vals, w, c.h)
         r = dict(h=c.h, fold=c.test_fold, msa=c.msa, origin=c.origin, regime=c.regime,
                  bleed=bool(c.last_target >= RESERVED_START),
                  fused=mape_pct(c.actuals, fz), naive=mape_pct(c.actuals, c.naive))
@@ -327,3 +335,25 @@ def score(cells, models, values_fn: ValuesFn = production_values, scheme: str = 
 
 def summarize(df: pd.DataFrame, cols=("naive", "fused")) -> pd.DataFrame:
     return df.groupby("h")[list(cols)].mean()
+
+
+def val_fused_mape(cells, fold, model: FoldModel, values_fn: ValuesFn, h: int,
+                   scheme: str = "adaptive", weights_fn: Optional[Callable[[Cell], dict]] = None,
+                   bound_targets: bool = True) -> float:
+    """Mean fused MAPE over fold's own validation cells at horizon h, with the
+    weighting that fold would use on test (adaptive: its chosen mode with the
+    effective regime weights; horizon: horizon-only; or a fixed weights_fn)."""
+    out = []
+    for c in cells:
+        if c.h != h or not _in_val(c, fold, bound_targets):
+            continue
+        if weights_fn:
+            w = weights_fn(c)
+        elif scheme == "horizon":
+            w = model.horizon_weights[h]
+        elif scheme == "fold" or model.mode[h] == "fold":
+            w = model.fold_weights
+        else:
+            w = model.regime_grid[c.regime][h]["weights_eff"]
+        out.append(mape_pct(c.actuals, fuse(values_fn(c, fold.fold), w, h)))
+    return float(np.mean(out)) if out else float("inf")
