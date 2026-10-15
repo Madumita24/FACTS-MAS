@@ -1,4 +1,23 @@
-"""Compare the AR Agent (ETS) against the naive last-value baseline.
+"""
+SUPERSEDED for reported numbers -- retained because test_macro_agent.py
+imports actual_values() and mape() from here.
+
+This script issues ONE forecast per (msa, fold) at fold.train_end, so its
+horizons extend into that fold's embargo. Its aggregate figures (naive
+4.690 / 9.337 / 13.670 against AR 2.734 / 5.508 / 7.790, AR winning 14/15,
+14/15 and 13/15 MSAs) were quoted in the paper and are withdrawn.
+
+Over the full origin set the correct figures are naive 4.194 / 7.371 /
+11.168 against AR 2.368 / 5.449 / 10.309, with AR winning 15/15, 14/15 and
+11/15. Those come from the cached agent forecasts restricted to test-window
+origins.
+
+The superseded numbers are exactly the class of single-origin estimate the
+paper's own full-window-evaluation section identifies as unreliable, so
+quoting them elsewhere in the paper was internally inconsistent.
+
+Original docstring follows.
+Compare the AR Agent (ETS) against the naive last-value baseline.
 
 Forecast origin for each (msa, fold) is that fold's train_end -- the same
 point-in-time cutoff both agents trained up to. Actual values are looked

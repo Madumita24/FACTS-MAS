@@ -109,6 +109,10 @@ for fold in FOLDS:
                 fut = md[md["date"] > ots].head(h)
                 if len(fut) < h:
                     continue
+                # Targets must not cross train_end into the embargo -- same
+                # correction applied to calibration.score_agent_over_window.
+                if fut["date"].max() > pd.Timestamp(end):
+                    continue
                 act = fut["inventory_count"].values.astype(np.float64)
                 for r in CANDIDATES:
                     row[r].append(compute_mape(act, forecast(last, structural, h, r)))

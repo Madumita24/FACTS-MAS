@@ -1,4 +1,16 @@
 """
+SUPERSEDED -- retained for provenance, do not cite.
+
+IMPACT_SCALE was removed from the agent entirely in August. The parity
+check in _verify_matches_agent() correctly refuses to run rather than
+report a number for a constant that no longer exists.
+
+The result this script originally produced stands as a historical finding:
+it is what drove the magnitude adjustment to zero in the first place. But
+re-running it today measures a dead parameter. See facts_mas/calibration.md.
+
+Original docstring follows.
+
 Calibration study: the Event Agent's IMPACT_SCALE.
 
 Follow-up to calibrate_event_window.py, which found that shortening

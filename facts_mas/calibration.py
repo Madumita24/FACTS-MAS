@@ -192,14 +192,14 @@ def score_agent_over_window(
     keyed by (msa, origin, horizon) so callers can diff two candidates origin
     by origin rather than only in aggregate.
     """
-    start, end = window
+    start, window_end = window
     per_origin: dict[tuple, float] = {}
 
     for msa in msas:
         msa_data = weekly_df[weekly_df["msa"] == msa].sort_values("date")
         origins = msa_data[
             (msa_data["date"] >= pd.Timestamp(start))
-            & (msa_data["date"] <= pd.Timestamp(end))
+            & (msa_data["date"] <= pd.Timestamp(window_end))
         ]["date"].values
 
         for origin_ts in origins:
@@ -212,6 +212,23 @@ def score_agent_over_window(
                 future = msa_data[msa_data["date"] > pd.Timestamp(origin)].head(horizon)
                 if len(future) < horizon:
                     continue
+
+                # The TARGETS have to stay inside the window too, not just the
+                # origin. An origin sitting at train_end with a 13-week horizon
+                # is scored against weeks train_end+1..train_end+13, which is
+                # the embargo -- the interval the fold schedule reserves
+                # precisely so a horizon-length label cannot straddle the
+                # train/test boundary. Dropping those origins is the same
+                # correction applied to the superseded single-origin AR
+                # diagnostic; this scorer had the identical defect.
+                #
+                # Caught by Madumita on review. The earlier no-lookahead test
+                # asserted only that the proposed ORIGINS fell inside the
+                # window, so it could not detect a target overrun and gave
+                # false assurance.
+                if future["date"].max() > pd.Timestamp(window_end):
+                    continue
+
                 actuals = future["inventory_count"].values.astype(np.float64)
 
                 try:

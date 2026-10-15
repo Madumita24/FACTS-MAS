@@ -40,6 +40,21 @@ from facts_mas.schema import AgentOutput
 # Feature columns from intrinsic_static.csv
 # ═══════════════════════════════════════════════════════════════════════════
 
+#: Total fraction of the gap to the structural level that the forecast
+#: closes by the end of the horizon. Promoted from a function-local to a
+#: module constant so facts_mas/calibration.py's override_constant() can
+#: reach it; previously every sweep had to reproduce the two lines that
+#: consume it, which is how calibrate_event_impact_scale.py silently drifted
+#: out of sync with its own agent.
+#:
+#: Calibrated value is 0.0, approved in 6 of 6 folds (calibrate_rho_max.py).
+#: Left at 0.30 pending the design decision in calibration.md: at 0.0 this
+#: agent returns the last observed value at every step, which IS the naive
+#: reference, so the channel would become a duplicate of the baseline rather
+#: than an independent evidence source.
+TOTAL_REVERSION = 0.30
+
+
 INTRINSIC_FEATURES = [
     "population",
     "median_income",
@@ -188,8 +203,6 @@ def run_intrinsic_agent(
     # that reversion happens: at h=4 step=1, reversion_frac is now
     # 0.30*(1/4)^2 = 0.019 (vs. the old linear 0.075) -- a much gentler
     # start, with most of the pull arriving later in the window.
-    TOTAL_REVERSION = 0.30
-
     forecast_values = []
     for step in range(1, horizon_weeks + 1):
         reversion_frac = TOTAL_REVERSION * (step / horizon_weeks) ** 2

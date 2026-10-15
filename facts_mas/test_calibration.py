@@ -137,6 +137,41 @@ def test_scoring_reads_no_data_past_window_end():
     assert min(seen) >= start, f"scorer used origin {min(seen)} before window start {start}"
 
 
+def test_scoring_targets_stay_inside_the_window():
+    """
+    The stricter version of the test above, and the one that matters.
+
+    Checking that proposed ORIGINS fall inside the window is not enough: an
+    origin at the window end scored over a 13-week horizon reads targets 13
+    weeks past it, straight into the embargo. The original test asserted only
+    the origin bound and therefore passed while the scorer was reading
+    embargoed labels. This asserts the property that was actually intended --
+    no target date exceeds the window end -- at the longest horizon, where the
+    overrun is largest.
+    """
+    scored = []
+
+    def spy_runner(df, msa, origin, horizon):
+        scored.append((origin, horizon))
+        return AgentOutput(agent_name="event", msa=msa, forecast_origin=origin,
+                           horizon_weeks=horizon, values=[1.0] * horizon)
+
+    fold = FOLDS[2]
+    start, end = _validation_window(fold)
+    score_agent_over_window(WEEKLY_DF, spy_runner, ["Phoenix"], (start, end), [13])
+
+    md = WEEKLY_DF[WEEKLY_DF["msa"] == "Phoenix"].sort_values("date")
+    assert scored, "scorer proposed nothing at the 13-week horizon"
+    for origin, horizon in scored:
+        fut = md[md["date"] > pd.Timestamp(origin)].head(horizon)
+        if len(fut) < horizon:
+            continue
+        last_target = fut["date"].max().date()
+        assert last_target <= end, (
+            f"origin {origin} at h={horizon} is scored against {last_target}, "
+            f"which is past the window end {end} and inside the embargo")
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # CalibrationTarget
 # ═══════════════════════════════════════════════════════════════════════════
@@ -259,6 +294,47 @@ def test_thin_fold_votes_neutral():
     assert not g.passes_consistency_check or g.dominant_direction == "neutral"
 
 
+
+
+def test_total_reversion_is_overridable():
+    """
+    TOTAL_REVERSION must be reachable by override_constant.
+
+    It was function-local, which forced calibrate_rho_max.py to reproduce the
+    two lines consuming it rather than override cleanly. The same pattern on
+    IMPACT_SCALE is how calibrate_event_impact_scale.py drifted out of sync
+    with its own agent without anything failing loudly. A constant the
+    calibration layer is expected to sweep belongs at module level, and this
+    test keeps it there.
+    """
+    import facts_mas.agents.intrinsic_agent as ia
+    assert hasattr(ia, "TOTAL_REVERSION"), "TOTAL_REVERSION is not module-level"
+    original = ia.TOTAL_REVERSION
+    with override_constant(ia, "TOTAL_REVERSION", 0.0):
+        assert ia.TOTAL_REVERSION == 0.0
+    assert ia.TOTAL_REVERSION == original, "not restored"
+
+
+def test_intrinsic_at_zero_reversion_equals_persistence():
+    """
+    At its calibrated value the intrinsic channel IS the naive reference.
+
+    Pinned as a test rather than left as a comment because it is the crux of
+    an open design decision: a channel reproducing the baseline satisfies the
+    output contract while carrying no independent information, and any fusion
+    weight it receives mechanically drags the forecast toward persistence.
+    """
+    import facts_mas.agents.intrinsic_agent as ia
+    static = pd.read_csv("intrinsic_static.csv")
+    origin = datetime.date(2025, 2, 1)
+    md = WEEKLY_DF[(WEEKLY_DF["msa"] == "Phoenix")
+                   & (WEEKLY_DF["date"] <= pd.Timestamp(origin))]
+    last = float(md.sort_values("date")["inventory_count"].iloc[-1])
+    with override_constant(ia, "TOTAL_REVERSION", 0.0):
+        out = ia.run_intrinsic_agent(WEEKLY_DF, static, "Phoenix", origin, 13)
+    assert all(abs(v - last) < 1e-6 for v in out.values),         "at rho=0 the intrinsic agent should hold the last value at every step"
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 
 print("\n-- override_constant --")
@@ -271,9 +347,12 @@ check("Validation window ends exactly at train_end", test_validation_window_ends
 check("Validation window is strictly before test_start", test_validation_window_never_touches_test_window)
 check("Validation window respects the 13-week embargo", test_validation_window_respects_embargo)
 check("Scorer proposes no origin outside its window", test_scoring_reads_no_data_past_window_end)
+check("Scorer targets stay inside the window (no embargo read)", test_scoring_targets_stay_inside_the_window)
 
 print("\n-- CalibrationTarget --")
 check("Target requires baseline among candidates", test_target_requires_baseline_in_candidates)
+check("TOTAL_REVERSION is module-level and overridable", test_total_reversion_is_overridable)
+check("Intrinsic at rho=0 equals persistence", test_intrinsic_at_zero_reversion_equals_persistence)
 
 print("\n-- Fold-consistency gate (NEXUS Mod-D) --")
 check("Gate passes at 5/6 folds", test_gate_passes_at_five_of_six)

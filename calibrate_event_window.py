@@ -1,4 +1,18 @@
 """
+SUPERSEDED -- retained for provenance, do not cite.
+
+DECLARATION_ACTIVE_WINDOW_WEEKS no longer influences the point forecast.
+The agent returns the last observed value held flat regardless of the
+window, so every candidate now scores identically (5.761 at all seven
+values, all folds neutral). The window still gates the reported confidence
+field, which the fusion layer does not consume.
+
+The result this script originally produced stands as a historical finding:
+it is what drove the magnitude adjustment to zero in the first place. But
+re-running it today measures a dead parameter. See facts_mas/calibration.md.
+
+Original docstring follows.
+
 Calibration study: the Event Agent's DECLARATION_ACTIVE_WINDOW_WEEKS.
 
 facts_mas/agents/event_agent.py sets this constant to 8 and says so plainly:
