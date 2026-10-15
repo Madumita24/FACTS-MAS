@@ -48,7 +48,7 @@ def test_intrinsic_is_horizon_consistent():
 
 
 def test_intrinsic_inconsistency_size():
-    """Pins the size: at step 4 the H=4 forecast closes ~10.7x more of the gap than H=13."""
+    """Pins the size: at step 4 the H=4 forecast closes 169/16 = 10.56x more of the gap than H=13."""
     from facts_mas.agents import intrinsic_agent as ia
     assert ia.TOTAL_REVERSION == 0.30
     assert 0.30 * (4 / 4) ** 2 / (0.30 * (4 / 13) ** 2) == pytest.approx(169 / 16)
