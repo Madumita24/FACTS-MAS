@@ -1,4 +1,4 @@
-# CONFIG: TEST CLEANBLEED | router_contrib = (fold-weights MAPE - adaptive MAPE) summed over the fold cells / all cells at h; positive = Router helps
+# CONFIG: TEST CLEANBLEED | router_contrib = (fold-weights MAPE - adaptive MAPE) summed over the fold's cells / all cells at h; positive = Router helps
 config,h,fold,router_contrib
 PROVISIONAL,4,1,0.0
 PROVISIONAL,4,2,0.0
