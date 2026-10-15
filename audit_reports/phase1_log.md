@@ -47,3 +47,19 @@ This file is written BEFORE each run. Hypotheses and selection rules below were 
 ## Running notes
 
 (appended below as runs complete)
+
+- 2026-10-15 leakage tests (`tests_audit/test_leakage.py`): 11 passed, 2 strict-xfail. H1.1 CONFIRMED (seasonal truncation identical; negative control detects past-data changes). Calibration scorer bounded: CONFIRMED. F0.10 and fold-6 reserved targets: CONFIRMED as leaks/bleed (xfail).
+- 2026-10-15 event sweeps (`p1_event_sweeps.py`, validation only): impact-scale unbounded reproduces paper Table 10 exactly; bounded values 1.3-1.9% lower, monotone, 0 wins 6/6 (H1.2 confirmed). Window grid A reproduces exactly; bounded values +5.9% to +6.1% (H1.3 magnitude prediction "<5%" WRONG for grid A), ordering and winner unchanged. Window grid B does NOT reproduce under my re-implementation (5.821 vs 5.321 at window 0, 9.160 vs 6.974 at 8); direction (0 best, 6/6) reproduces bounded and unbounded. Not investigated further per pre-registration.
+- 2026-10-15 environment note: PowerShell `python` resolves to a separate Python 3.13 install (pandas 2.3.3). A first fixture run and a first variant build were started with it by mistake; both were stopped / failed and were rerun with `C:\Anaconda3\python.exe` (pinned stack). No result in this phase comes from the 3.13 interpreter.
+- 2026-10-15 fast mirror (`tests_audit/audit_core.py`) matches the production fixture exactly (all fold weights, regime grids with n, validation MAPEs, modes, test MAPE, slice). Pin passes in base and in facts-audit env.
+- 2026-10-15 variants: seasonal_w5 == cached seasonality exactly (max diff 0). July event differs from naive in 663 of 15,480 cells.
+- 2026-10-15 `p1_analysis.py` outcomes:
+  - H1.4 WRONG on magnitude. Fold weights moved up to 0.073 (predicted < 0.05); no mode flips (as predicted); test MAPE moved -0.166 (8wk) and -0.388 (13wk) (predicted < 0.10). Mechanism checked before believing it: the whole 13wk change comes from fold 3's 435 hiking cells, which lose all hiking validation support under the bound (n 195 -> 0) and fall back to uniform 0.2 weights. Cells with support under both versions: +0.019 at 13wk. So the 13wk "gain" is an artifact, not evidence for the fix.
+  - H1.5 PARTLY WRONG on magnitude: 108-110 validation cells per fold touch imputed values in folds 1-3 (2.3%, predicted < 1%); fold weights move up to 0.030 (predicted < 0.01); no mode flips; test MAPE moves under 0.012. No NaN. 0 test cells touched.
+  - H1.6 WRONG at 13wk: excluding bleed cells moves pooled 13wk fused by +0.164 (predicted < 0.10), because the removed fold-6 cells are among the easiest.
+  - H1.7 CONFIRMED: V0 reproduces 2.243 / 5.038 / 7.020 exactly. Smoothing explains essentially all of the July -> now change (event removal alone: <= 0.002 at any horizon).
+  - H1.8 WRONG: validation picks window 7 in all 6 folds (edge of grid; predicted interior in >= 4). Per rule, 7 adopted; grid NOT extended. R1 vs PROVISIONAL (CLEANBLEED): -0.005 / -0.033 / +0.039.
+  - H1.9 CONFIRMED: fold 2 hiking and fold 5 cutting have n = 0 validation points and get uniform 0.2 weights at 8 and 13 weeks (390 test cells per horizon).
+  - H1.10 CONFIRMED: COVID-driven July event cells (351) all have origins 2020-01-25 .. 2020-03-14; none in test windows. Current event == naive everywhere.
+  - H1.11 CONFIRMED: intrinsic := naive moves fused MAPE by +0.002 / -0.008 / +0.011.
+  - Seasonal sweep rebuild: definition (a) (standalone seasonal, fold 6 test) reproduces the original table exactly, and ONLY when the 165 reserved-window cells are included. So the window choice used Jan-Feb 2026 actuals.

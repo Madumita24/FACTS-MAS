@@ -1,0 +1,10 @@
+# CONFIG: commit=ef28f47 | split=TEST fold 6 only | folds=1-6 | msas=15 | horizons=4,8,13 | zillow=smoothed | fusion=adaptive T=0.05 104wk | rho_max=0.3 | label=DISCLOSURE | note=rebuild of f56fe8a sweep
+def,window,bleed_cells,h4,h8,h13
+a standalone seasonal,1,included,1.372979583886375,2.195282883860865,3.051520743653604
+a standalone seasonal,1,excluded,1.372979583886375,2.012653753339939,2.805023704772024
+a standalone seasonal,3,included,1.2230027725429533,2.090336699924297,2.9785333107454863
+a standalone seasonal,3,excluded,1.2230027725429533,1.9554187164430907,2.8097445606299583
+a standalone seasonal,5,included,1.182844674245812,2.0617813865831254,2.979953271265122
+a standalone seasonal,5,excluded,1.182844674245812,1.9254998495416051,2.802490541993571
+a standalone seasonal,7,included,1.2130828427849387,2.107068068252398,3.0689992693910546
+a standalone seasonal,7,excluded,1.2130828427849387,1.9459779440682257,2.8405162296497184

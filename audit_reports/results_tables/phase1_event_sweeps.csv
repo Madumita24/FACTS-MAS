@@ -1,0 +1,12 @@
+# CONFIG: commit=ef28f47+ | split=VALIDATION only (104-week window ending train_end, folds 1-6, 15 MSAs, h=4,8,13 pooled) | event agent = July logic (magnitude x scale, 8-week window) | panel capped 2026-02-21 | script=audit_reports/phase1_scripts/p1_event_sweeps.py
+# Grid B could not be reproduced: the "original" row is copied from facts_mas/calibration.md; the audit re-implementation gives the "unbounded" row.
+sweep,targets,c1,c2,c3,c4,c5,c6,c7,best,folds_improving_vs_production
+impact_scale (0;0.01;0.02;0.03;0.05;0.075;0.10),paper Table 10,5.813,5.982,6.227,6.529,7.229,8.242,9.357,0,6/6
+impact_scale (0;0.01;0.02;0.03;0.05;0.075;0.10),unbounded (audit rerun),5.813,5.982,6.227,6.529,7.229,8.242,9.357,0,6/6
+impact_scale (0;0.01;0.02;0.03;0.05;0.075;0.10),bounded to train_end,5.704,5.869,6.112,6.413,7.110,8.121,9.234,0,6/6
+window grid A (2;4;6;8;12;16;26),calibration.md,5.442,6.067,6.530,6.671,6.797,7.943,8.905,2,6/6
+window grid A (2;4;6;8;12;16;26),unbounded (audit rerun),5.442,6.067,6.530,6.671,6.797,7.943,8.905,2,6/6
+window grid A (2;4;6;8;12;16;26),bounded to train_end,5.761,6.436,6.914,7.056,7.177,8.134,8.934,2,6/6
+window grid B (0;1;2;3;4;6;8),calibration.md,5.321,5.844,6.094,6.318,6.532,6.855,6.974,0,6/6
+window grid B (0;1;2;3;4;6;8),unbounded (audit re-implementation; does NOT match),5.821,6.804,7.311,7.775,8.192,8.845,9.160,0,6/6
+window grid B (0;1;2;3;4;6;8),bounded to train_end,5.711,6.694,7.188,7.630,8.047,8.715,9.033,0,6/6
