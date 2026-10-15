@@ -187,7 +187,13 @@ def _in_val(cell: Cell, fold, bound_targets: bool) -> bool:
 def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_values,
                      bound_targets: bool = False, temperature: float = TEMPERATURE,
                      exclude: Optional[Callable[[Cell], bool]] = None,
-                     agents: Optional[list] = None) -> FoldModel:
+                     agents: Optional[list] = None,
+                     min_support_weeks: Optional[int] = None) -> FoldModel:
+    """min_support_weeks (audit fix 2, default None = production behaviour):
+    a (regime, horizon) cell whose validation window holds fewer than this many
+    DISTINCT origin weeks of that regime uses the fold weights instead of its
+    own softmax weights, both in the mode-selection comparison and on test.
+    Support is counted in weeks, not cells, because the regime label is national."""
     agents = agents or AGENTS
     val = [c for c in cells if _in_val(c, fold, bound_targets) and not (exclude and exclude(c))]
 
@@ -207,13 +213,22 @@ def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_v
             by_rh[(c.regime, c.h)][a].append(s)
 
     fold_w = softmax({a: median_skill(pooled[a]) for a in agents}, temperature)
+    weeks = {(r, h): set() for r in REGIMES for h in HORIZONS}
+    for c in val:
+        weeks[(c.regime, c.h)].add(c.origin)
+
     grid = {r: {} for r in REGIMES}
     for r in REGIMES:
         for h in HORIZONS:
             pts = by_rh[(r, h)]
             sk = {a: median_skill(pts[a]) for a in agents}
-            grid[r][h] = {"weights": softmax(sk, temperature), "skills": sk,
-                          "n": max(len(p) for p in pts.values())}
+            w = softmax(sk, temperature)
+            sup = len(weeks[(r, h)])
+            fb = min_support_weeks is not None and sup < min_support_weeks
+            grid[r][h] = {"weights": w, "skills": sk,
+                          "n": max(len(p) for p in pts.values()),
+                          "support_weeks": sup, "fallback": fb,
+                          "weights_eff": fold_w if fb else w}
 
     mode, vm = {}, {}
     for h in HORIZONS:
@@ -222,7 +237,7 @@ def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_v
             if c.h != h:
                 continue
             vals = values_fn(c, fold.fold)
-            rw = grid[c.regime][h]["weights"]
+            rw = grid[c.regime][h]["weights_eff"]
             ff = np.zeros(h)
             rf = np.zeros(h)
             for a in agents:
@@ -247,8 +262,32 @@ def weights_for(cell: Cell, models: dict, scheme: str = "adaptive") -> dict:
     if scheme == "fold":
         return m.fold_weights
     if scheme == "regime" or (scheme == "adaptive" and m.mode[cell.h] == "regime"):
-        return m.regime_grid[cell.regime][cell.h]["weights"]
+        return m.regime_grid[cell.regime][cell.h]["weights_eff"]
     return m.fold_weights
+
+
+def load_r1_seasonal(path: Optional[str] = None) -> dict:
+    """R1 baseline seasonal outputs (window 7, chosen on validation in every fold, Phase 1).
+    Built by audit_reports/phase1_scripts/p1_build_variants.py; hash checked."""
+    import hashlib
+    import pickle
+    path = path or os.path.join(REPO, "audit_reports", "artifacts", "seasonal_w7_r1.pkl")
+    blob = open(path, "rb").read()
+    if hashlib.sha256(blob).hexdigest() != R1_SHA256:
+        raise RuntimeError(f"{path} does not match the Phase 1 R1 artifact hash")
+    return pickle.loads(blob)
+
+
+R1_SHA256 = "3b530099abfe5bedcb994ca809ce8ae4b8e8e5a28bdf94c0c9dd43e560557017"
+
+
+def r1_values_fn(w7: dict) -> ValuesFn:
+    """values_fn for the R1 baseline: production values with seasonality := window 7."""
+    def f(cell: Cell, fold: int) -> dict:
+        v = dict(cell.values)
+        v["seasonality"] = w7[(cell.msa, cell.origin, cell.h)]
+        return v
+    return f
 
 
 def fuse(values: dict, weights: dict, h: int, drop: frozenset = frozenset()) -> np.ndarray:

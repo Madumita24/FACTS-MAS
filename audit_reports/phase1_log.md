@@ -63,3 +63,12 @@ This file is written BEFORE each run. Hypotheses and selection rules below were 
   - H1.10 CONFIRMED: COVID-driven July event cells (351) all have origins 2020-01-25 .. 2020-03-14; none in test windows. Current event == naive everywhere.
   - H1.11 CONFIRMED: intrinsic := naive moves fused MAPE by +0.002 / -0.008 / +0.011.
   - Seasonal sweep rebuild: definition (a) (standalone seasonal, fold 6 test) reproduces the original table exactly, and ONLY when the 165 reserved-window cells are included. So the window choice used Jan-Feb 2026 actuals.
+
+## Decisions recorded after Phase 1 (Umang, 2026-10-15)
+
+- Baseline from Phase 2 on = **R1** (seasonal window 7 in every fold, chosen on validation, nested; production harness otherwise). Primary column = CLEANBLEED. T = 0.05, the Router design and the adaptive-vs-granular choice stay labelled PROVISIONAL.
+- **Finding kept as a finding, not only a bug:** in the zero-support cells (fold 2 hiking, fold 5 cutting), equal weights beat skill-based fold weights at 13 weeks (5.584 vs 7.025; 10.112 vs 12.489) and lose at 8 weeks (4.748 vs 4.015; 7.610 vs 7.000). Carry forward: an **equal-weight baseline in Phase 3**, and **shrinkage toward equal weights in Phase 5**.
+- **Pre-registered for Phase 5:** seasonal window grid {7, 9, 11, 13}, same nested selection rule as H1.8 (standalone seasonal validation MAPE, h 4/8/13 pooled, targets <= train_end, tie -> smaller). No values beyond 13.
+- Event window grid B: Umang to check with Madumita. If no script turns up, mark not reproducible and drop from the paper.
+- Paper Table 10: replace with the bounded values (5.704 / 5.869 / 6.112 / 6.413 / 7.110 / 8.121 / 9.234) with a footnote on why.
+- New running file: `audit_reports/paper_claims_status.md`.
