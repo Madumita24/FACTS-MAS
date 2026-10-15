@@ -1,0 +1,11 @@
+# CONFIG: commit=50df9b2 | baseline=R1 (seasonal w7 nested) | split=TEST | folds=1-6 | msas=15 | horizons=4,8,13 | zillow=smoothed | fusion=adaptive T=0.05 104wk (PROVISIONAL: T, Router, adaptive choice) | rho_max=0.3 | primary=CLEANBLEED | note=deviation from naive % {'ar': 8.210214119577861, 'event': 0.0, 'intrinsic': 6.252290719898164, 'macro': 1.1168134921779305, 'seasonality': 5.0939352754991685}
+config,h,naive_like
+PROVISIONAL,4,0.0078050728291346105
+PROVISIONAL,8,0.248879900737954
+PROVISIONAL,13,0.25855974333128917
+R1,4,0.007228523136850285
+R1,8,0.255274522494703
+R1,13,0.2597179762547354
+R1 combined,4,0.008833411870411388
+R1 combined,8,0.005027468819277124
+R1 combined,13,0.0066809588586141935

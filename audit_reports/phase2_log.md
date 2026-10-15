@@ -42,3 +42,16 @@ Expected cells that fall back (from Phase 1 episode counts): fold 1 hiking (2 we
 ## Running notes
 
 (appended as runs complete)
+- 2026-10-15 `tests_audit/test_components.py`: 7 passed, 1 strict-xfail. H2.1 CONFIRMED (AR, seasonal, macro, event horizon-consistent; intrinsic not). Event == naive in 15,480 of 15,480 cached cells. R1 pinned.
+- 2026-10-15 `p2_analysis.py` outcomes (CLEANBLEED unless stated):
+  - H2.0 fix 2 alone CONFIRMED: 4wk unchanged (2.089); 8wk 4.952 -> 4.816 (-0.136, in predicted -0.05..-0.15); 13wk 7.058 -> 7.262 (+0.204, in predicted +0.20..+0.35). Exactly the 780 zero-support cells change (390 at 8wk, 390 at 13wk). No mode flips.
+  - H2.0 F0.10 alone CONFIRMED (artifact as in Phase 1): 13wk 6.651.
+  - H2.0 combined: 8wk better as predicted (4.468, -0.484). 13wk prediction "worse" WRONG: 6.987 (-0.071). 4wk +0.033 (fold weights bounded; worse in 5 of 6 folds). Mechanism checked: fold 3 hiking (13 weeks of support unbounded, < 13 bounded) falls back from regime weights macro 0.78 / AR 0.00 to fold weights AR 0.75 / seasonal 0.25: -0.370 (8wk), -0.273 (13wk) pooled. Fold 5 cutting loses the lucky equal weights: +0.171 at 13wk. Net change rests on one fold. No mode flips (<= 3 predicted).
+  - Threshold sensitivity (DISCLOSURE only, not used): threshold 4 -> 8wk 4.648 / 13wk 6.987; threshold 26 -> 8wk 4.468 / 13wk 7.337 (fold 5 stable at 13wk also falls back).
+  - H2.2 PARTLY CONFIRMED: macro's 0.169 mean weight at 13wk = 0.137 from fold 3 hiking (13-week cell, AR median skill -0.599) + 0.032 from the equal-weight cells. Window-level skill ranks AR above macro at 13wk in 5/6 folds (MAE ratio) but only 4/6 (MAPE ratio) (predicted >= 5 for both). Median skill pooled over regimes ranks AR above macro in 6/6 folds; the disagreement is regime-cell level, not median vs aggregate.
+  - H2.3 CONFIRMED: naive-like weight (event + macro + intrinsic) under R1 0.007 / 0.255 / 0.260; under combined 0.009 / 0.005 / 0.007.
+  - H2.4 PARTLY WRONG: event change share 0 (confirmed); macro change share 0.113 (8wk) and 0.092 (13wk), not < 0.05 (fold 3 hiking weight).
+  - H2.5 WRONG: 43 of 344 labelled weeks (12.5%) lie within 0.05 of +/-0.25 (predicted < 10%). Threshold 0.20 flips 24 labels, 0.30 flips 19.
+  - Regime cells (13wk, CLEANBLEED): under R1, fold-weight (Router-off) fusion already beats naive in hiking (6.387 vs 8.059) and cutting (12.034 vs 13.043). The Router's cutting gain (10.181) is entirely the equal-weight artifact; in hiking the Router hurts (7.236). Under combined the Router's 13wk gain sits in stable cells (6.633 vs 8.317), and 60-75% of it comes from fold 4.
+- Decision needed recorded for Umang: adopt R1 + fix2 + F0.10 ("R1c") as baseline.
+- Proposed for Phase 4 (not run): a horizon-conditioned, regime-blind weight set as the correct reference for the Router ablation, since "- Router" currently removes horizon conditioning too.
