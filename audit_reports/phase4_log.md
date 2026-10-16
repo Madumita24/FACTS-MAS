@@ -54,3 +54,16 @@ Written and committed BEFORE any Phase 4 number is computed (together with `phas
 ## Running notes
 
 (appended as runs complete)
+- 2026-10-16 `p4_cells.py`: P (event and intrinsic retired) = 2.118 / 3.622 / 5.731 CLEANBLEED; P with 5 channels = 2.122 / 3.622 / 5.735 (= Phase 3 rule outcome). SelBest-model selections identical to Phase 3. D4 CONFIRMED (retirement moves P by <= 0.005).
+- 2026-10-16 `p4_stats.py`, process note: the first MCS run mishandled exact duplicates (SelBest-model == FA-ETS-d at 8 and 13 weeks gives a zero-variance difference and a 0/0 t-statistic). Fixed by merging exact duplicates before the MCS, then rerun; only the fixed version is reported. DM, bootstrap and equivalence results were unaffected.
+- Outcomes (CLEANBLEED; DISCLOSURE gives the same conclusions):
+  - D1 CONFIRMED: P vs naive panel DM t = -6.9 / -6.3 / -5.7 (p < 1e-4); per-MSA DM significant after BH in 15 / 15 / 15 MSAs.
+  - D2 NOT CONFIRMED as stated: at 4 weeks P - FA-ETS-d = +0.144, panel DM p = 0.124 (not significant at 5%); the 95% block CI [-0.003, 0.281] just covers 0; the 90% paired CI [0.022, 0.261] excludes 0 (one-sided 5%). Weak evidence that P is worse at 4 weeks.
+  - D3 PARTLY: 8 weeks C2 vs FA-ETS-d diff +0.014, DM p = 0.14, equivalent within 2% (90% CI [-0.0005, 0.030], margin 0.072) CONFIRMED. 13 weeks: diff +0.071, DM p = 0.090; 90% CI [0.0075, 0.146] is not inside the 0.113 margin and excludes 0: NOT equivalent, FA-ETS-d marginally better (predicted "inconclusive"). 4 weeks: C2 equivalent to FA-ETS-d (diff +0.006).
+  - D5 CONFIRMED: block CIs are 4.4x to 7.3x wider than iid CIs.
+  - D6 PARTLY: 90% MCS contains FA-ETS-d at every horizon and C2 / SelBest at 8 and 13 (yes); excludes R1c at 8 weeks (p = 0.054) but NOT at 13 weeks (at 13 weeks every method except naive has MCS p = 0.188; only FA-ETS-d / SelBest survive at 25%).
+  - D7 CONFIRMED: original spec reproduces FFR p = 0.0424; Holm-adjusted 0.170; wild cluster bootstrap p = 0.073; Driscoll-Kraay (MSA FE) p = 0.71.
+  - Not predicted: 13-week CHANGES with MSA+YQ FE and MSA-clustered SEs give FFR t = -9.3 and CPI t = 7.5 (both survive Holm), but with Driscoll-Kraay SEs (which allow the cross-sectional correlation of a national regressor) p = 0.15 and 0.32. Reported, not re-specified.
+  - D8 CONFIRMED: distributed lag sums: lags 0-12 = -0.155 (t = -1.45), lags 13-26 = +0.167 (t = 1.58); signs opposite to the sign-flip hypothesis and neither significant.
+  - D9 PARTLY: true regime labels are beaten by 46% (8wk) and 27% (13wk) of block-permuted placebos (CONFIRMED: not better than 90%). Period labels are 0.42 worse than true at 13 weeks (predicted within 0.3: WRONG). Recency-weighted skill (no regimes) is 0.58 BETTER than true regimes at 13 weeks (6.410 vs 6.987).
+  - D10 NOT CONFIRMED: on fold 1, P and FA-ETS-d beat TimesFM at 4 weeks (DM p = 0.012 and 0.003); at 8 and 13 weeks they have lower MAPE (4.14 / 4.11 vs 5.47; 7.68 / 7.39 vs 10.81) but DM p = 0.07 and 0.12 with only 29 weeks.
