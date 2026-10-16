@@ -103,7 +103,7 @@ sha256 of forecast-path files at freeze (working copy):
 | `aligned_weekly.csv` | 3ab9fa305ad42ad20cbffc83c996cf851644af555c5fd75a2889bd57e2a09836 |
 | `macro_weekly.csv` | bc7ff7fb30a0e4131259184e2fb7d02de9dac310d99fbe47d91f1ef5802685a8 |
 
-Runner sha256 at gate pass: _(recorded when the gate passes)_
+Runner sha256 at gate pass: `06dee8fd40831734adbdc706a75ed160494c07a2d236ee3694d612485c519dce` (`audit_reports/phase7/run_holdout.py`, gate criterion v2, passed 2026-10-16; record in `audit_reports/phase7/gate_record.json`)
 
 ## 10. Decisions taken at freeze (2026-10-16)
 
