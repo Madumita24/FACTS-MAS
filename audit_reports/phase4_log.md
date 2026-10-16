@@ -67,3 +67,10 @@ Written and committed BEFORE any Phase 4 number is computed (together with `phas
   - D8 CONFIRMED: distributed lag sums: lags 0-12 = -0.155 (t = -1.45), lags 13-26 = +0.167 (t = 1.58); signs opposite to the sign-flip hypothesis and neither significant.
   - D9 PARTLY: true regime labels are beaten by 46% (8wk) and 27% (13wk) of block-permuted placebos (CONFIRMED: not better than 90%). Period labels are 0.42 worse than true at 13 weeks (predicted within 0.3: WRONG). Recency-weighted skill (no regimes) is 0.58 BETTER than true regimes at 13 weeks (6.410 vs 6.987).
   - D10 NOT CONFIRMED: on fold 1, P and FA-ETS-d beat TimesFM at 4 weeks (DM p = 0.012 and 0.003); at 8 and 13 weeks they have lower MAPE (4.14 / 4.11 vs 5.47; 7.68 / 7.39 vs 10.81) but DM p = 0.07 and 0.12 with only 29 weeks.
+
+## Decisions after Phase 4 (Umang, 2026-10-16)
+
+- C6 (regime conditioning) withdrawn. Recency-weighted skill (6.410 at 13 weeks) recorded as an observation from TEST data, future work only, not a candidate.
+- 4-week production: the Phase 3 rule outcome stands; Phase 5's rule (base C2 at all horizons) decides it.
+- Raw-cut CIs and DM tests to be added at the start of Phase 5, reporting only, no selection.
+- Phase 5 approved as pre-registered, with a P5a addendum committed before any flow data is used in a model.

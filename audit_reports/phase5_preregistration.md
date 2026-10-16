@@ -58,3 +58,16 @@ Written 2026-10-16, **before any Phase 4 result was computed or read** (see git 
 - P5b: betas near 0 in most folds; gain under 0.05.
 - P5c: validation picks lambda > 0 in at least half of the (fold, horizon) cells; gain under 0.05.
 - Most likely outcome: nothing beats FA-ETS-d by a margin the Phase 4 bootstrap would call real.
+
+## Addendum A (2026-10-16): P5a rules, added on Umang's instruction before any flow data is downloaded or used
+
+These rules are committed before any flow file is downloaded. They tighten P5a; they do not add variants.
+
+1. **Only flow values dated at or before (origin - L)** are used, where L is the availability lag in item 2. Never a value dated after the origin.
+2. **Availability lag L.** For each flow series, find Zillow's publication timing (documentation, plus the gap between the last date in each downloaded file and the download date). Apply a conservative lag of **at least 1 week**, with the reasoning documented. **If timing cannot be confirmed, L = 2 weeks.** (The inventory target itself keeps the backtest's existing convention of being known at the origin; that asymmetry is noted, not changed.)
+3. **Smoothing matches the target:** smoothed (`_sm`) flow files for the smoothed target. Same 2026-02-21 cap (header read first, only columns <= cap loaded), sha256 of every file logged, and the first date with data reported per series.
+4. **History start.** If any flow series starts after 2019-02-02, report it. A fold is eligible for P5a only if every origin in its validation and test windows has the needed lagged flow values for all 15 MSAs. P5a is scored on eligible folds only, with B5 on the same folds. If fewer than 6 folds are eligible, P5a cannot satisfy the "at least 5 of 6 folds" rule and is reported as not promotable (results still shown). No substitute rule is invented.
+5. **Leakage test** like the FA-ETS-d one: flow-channel forecasts from data truncated at the origin equal those from the full (capped) data; negative control: corrupting flows dated after (origin - L) changes nothing, corrupting earlier flows changes the forecast.
+6. **If P5a fails the promotion rule, the null is reported.** No extra flow variants.
+7. **Estimation window (clarification of "fitted per fold").** Fitting once per fold on all pairs with target <= train_end would score the flow channel in-sample on that fold's own validation window and inflate its fusion weight. Instead the pooled regressions are **refitted at every origin using only pairs whose target date is on or before that origin** (expanding window), with window-7 factors computed at that origin. For test origins this still uses no data after the origin. This is the only change to the P5a model specification, and it is made before any flow data is seen.
+8. The price-cut share is used only if a weekly metro smoothed file exists; otherwise the channel uses new listings and newly pending only (recorded, not substituted).
