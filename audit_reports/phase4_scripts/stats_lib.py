@@ -39,13 +39,15 @@ def bh(p, q=0.05):
     return sig
 
 
-def block_indices(T, seed):
+def block_indices(T, seed, block_len=None):
+    """Moving block bootstrap indices over T weeks. block_len defaults to L = 13 (Phases 4-5)."""
+    Lb = L if block_len is None else int(block_len)
     rng = np.random.default_rng(seed)
-    n = int(np.ceil(T / L))
+    n = int(np.ceil(T / Lb))
     out = np.empty((B, T), dtype=int)
     for b in range(B):
-        starts = rng.integers(0, T - L + 1, size=n)
-        out[b] = np.concatenate([np.arange(s, s + L) for s in starts])[:T]
+        starts = rng.integers(0, T - Lb + 1, size=n)
+        out[b] = np.concatenate([np.arange(s, s + Lb) for s in starts])[:T]
     return out
 
 
