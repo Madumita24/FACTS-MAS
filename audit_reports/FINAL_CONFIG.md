@@ -79,7 +79,7 @@ Pinned `requirements.txt` stack (Python 3.11.13, numpy 2.4.6, pandas 3.0.6, scip
 
 ## 9. Freeze record
 
-Frozen commit: _(recorded by the following commit)_
+Frozen commit: `a27a23ab7b1a136c860b110e6871ad1bb4c7dfa8` (2026-10-16)
 
 sha256 of forecast-path files at freeze (working copy):
 
