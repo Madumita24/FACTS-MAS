@@ -1,8 +1,6 @@
-# FINAL_CONFIG (PROPOSED, not frozen)
+# FINAL_CONFIG (FROZEN)
 
-Status: **PROPOSED** on 2026-10-16 at the end of Phase 5. It becomes frozen only when Umang confirms in chat. At that point the commit hash of the confirming commit is written below, and nothing in the forecasting path may change before the Phase 7 holdout run.
-
-Frozen commit: _(to be filled at confirmation)_
+Status: **FROZEN** on 2026-10-16. Umang confirmed in chat: freeze P exactly as written in section 1; holdout option A. Nothing in the forecast path changes after this. The configuration is frozen by the commit that introduces this text; its hash is recorded in section 9 by the next commit (a commit cannot contain its own hash). The file hashes in section 9 make any later change to the forecast path detectable.
 
 ## 1. What the production system is, and why
 
@@ -50,17 +48,66 @@ Note: the authors withdrew the regime-conditioning *claim* (C6). The Router mech
 - Channel forecasts: `facts_mas/agents/*` (Holt, seasonal, macro) and `audit_reports/phase3_scripts/p3_build_baselines.py::forecasts_at` (FA-ETS-d).
 - **Gap:** P currently runs only on cached cells. The project package `facts_mas/` does not implement window 7, fix 2, F0.10, FA-ETS-d or the channel retirement. Phase 7 needs an executable runner (section 7).
 
-## 6. Proposed Phase 7 holdout protocol (for confirmation)
+## 6. Phase 7 holdout protocol (FROZEN, option A)
 
-- Refresh the Zillow pull (inventory smoothed and raw), archive the raw downloads with date stamps and sha256, and check that refreshed values on or before 2026-02-21 equal the archived capped panels (any revision is reported, not hidden).
-- **One holdout fold:** train_end = **2026-02-21**. Validation window as in section 4 (targets <= 2026-02-21). Weights, damped choice and modes computed once from that window.
-- **Holdout origins: 2026-02-28 onward**, every week with a complete h-week target in the refreshed data. With data to 2026-10-03 that gives about 28 / 24 / 19 origins x 15 MSAs at 4 / 8 / 13 weeks. Option B: a 13-week embargo (origins from 2026-05-30), consistent with the backtest folds but leaving only about 15 / 11 / 6 origins. I recommend option A: the F0.10 bound already keeps validation targets before train_end, so the embargo is not needed to prevent leakage.
-- Methods: naive, seasonal naive, FA-ETS-d, P; B5 as the documented equivalent alternative; TimesFM; the CoT baseline (state the LLM and its knowledge cutoff). No Phase 5 winner exists.
-- Report with Phase 4 statistics (block bootstrap CIs, panel DM), both cuts. **Nothing may be changed after seeing results**; bugs are reported, not silently fixed.
+- **Do not run until Umang confirms co-author sign-off.**
+- Refresh the Zillow pull (inventory smoothed and raw), archive each raw download with a date stamp and sha256 in its own directory outside the repo, and check that refreshed values on or before 2026-02-21 equal the archived capped panels (`audit_reports/artifacts/zillow_{sm,raw}_vintage20261015_capped20260221.csv`). Any revision is reported, not hidden. Refresh FRED macro with the same publication-lag rules.
+- **One holdout fold:** train_end = **2026-02-21**. Validation window as in section 4 (origins in [train_end - 104 weeks, train_end], targets <= train_end). Weights, the damped choice and the Router modes are computed once from that window.
+- **Holdout origins: 2026-02-28 onward** (no embargo), every week with a complete h-week target in the refreshed data. With data to 2026-10-03 that is about 28 / 24 / 19 origins x 15 MSAs at 4 / 8 / 13 weeks.
+- **Methods:** naive, seasonal naive, Naive2 (seasonal channel), FA-ETS-d, P, B5, TimesFM, CoT. No Phase 5 winner exists.
+- **Cuts:** smoothed (primary) and raw, both in the main table.
+- **Statistics:** panel DM (Newey-West lag h-1); per-MSA DM (HLN, BH); paired moving block bootstrap over whole weeks, B = 5,000, seed 20261016, block length L = h, except where h > T/2, where L = floor(T/2) and the CI is flagged as unreliable; MCS (T_max) as Phase 4.
+- **Pre-registered holdout hypotheses (smoothed cut, primary):**
+  - H7.1 P beats naive at every horizon: pooled MAPE lower and the 95% paired block CI of P - naive below 0.
+  - H7.2 FA-ETS-d beats naive at every horizon (same test).
+  - H7.3 P is approximately equal to FA-ETS-d at 8 and 13 weeks: 90% paired block CI of P - FA-ETS-d inside +/- 2% of FA-ETS-d's MAPE (equivalence). If the CI is wider than the margin but contains 0, the result is "inconclusive", not "equal".
+  - H7.4 FA-ETS-d <= P at 4 weeks: point estimate of P - FA-ETS-d >= 0, reported with its 95% CI.
+- **Secondary analysis (reporting only):** every method re-run with a **2-week publication lag on inventory**: the information set at origin t is data dated <= t - 2 weeks (forecasts made from t - 2 for targets t + 1 .. t + h; the naive reference is the value at t - 2; weights and validation computed the same way). Same statistics, both cuts.
+- **CoT:** holdout only, not the backtest folds. Script prepared by the audit without any API key; run by Umang or Madumita. It must log the model name, its stated knowledge cutoff and the run date. Since the holdout starts 2026-02-28, CoT results count as out-of-sample only if the stated cutoff is before the earliest holdout target date.
+- **TimesFM:** run in its own environment on holdout origins (context = data <= origin, or <= origin - 2 weeks in the secondary analysis).
+- Report everything. **Nothing may be changed after seeing results**; bugs are reported, not silently fixed.
 
-## 7. Decisions needed before freezing
+## 7. Runner and gate (FROZEN)
 
-1. Confirm P as the frozen configuration (or state a change before freezing).
-2. Holdout option A (no embargo) or B (13-week embargo).
-3. Runner: (a) the audit builds `audit_reports/phase7/run_holdout.py` from the existing agent code plus `audit_core`. It must first reproduce the Phase 4 P numbers on folds 1-6 from raw agent code (not the cache) before it touches holdout data. Or (b) the authors port the configuration into `facts_mas/` (owner: Umang).
-4. Environment: pinned `requirements.txt` stack (Python 3.11, numpy 2.4.6, pandas 3.0.6, statsmodels 0.15.0, scikit-learn 1.9.1). TimesFM in its own environment.
+- Runner: `audit_reports/phase7/run_holdout.py`, built by the audit from the frozen components (section 5).
+- **Gate:** before reading anything dated after 2026-02-21, the runner must reproduce P's Phase 4 CLEANBLEED numbers on folds 1-6 (2.1176 / 3.6218 / 5.7309) from agent code, not the cache. Tolerance: AR optimizer noise. The maximum per-cell and pooled differences are reported. The runner's own sha256 at gate pass is recorded in section 9.
+- Porting to `facts_mas/` happens after Phase 7.
+
+## 8. Environment
+
+Pinned `requirements.txt` stack (Python 3.11.13, numpy 2.4.6, pandas 3.0.6, scipy 1.17.1, statsmodels 0.15.0, scikit-learn 1.9.1, pydantic 2.13.5), run with `C:\Anaconda3\python.exe`. Macro inference only: `facts-audit` env. TimesFM: its own environment (recorded when built).
+
+## 9. Freeze record
+
+Frozen commit: _(recorded by the following commit)_
+
+sha256 of forecast-path files at freeze (working copy):
+
+| File | sha256 |
+|---|---|
+| `ar_agent.py` | cc53e5f8d7b042a393916ba074c443c470ecff75c5867544af18cea0c04b9d46 |
+| `macro_agent.py` | b4838e64399928505ec995ce140c455131739e22bf32b58846df866b8d186776 |
+| `naive_baseline.py` | 337bba94fff4d1f9dcf2dc58703731df9fb21a248f7e2f866ac09fc2bd2a1e1d |
+| `align_data.py` | c197043c121538f861588f416f5d1c36b637be8ce0e1d78ce8777a370dc492f0 |
+| `pull_zillow.py` | c097693344ae9d5fea8b6ec7c3ef31904f31daafc21742dffe0fff8ffbc0223c |
+| `requirements.txt` | 9f4c5464f042356736fd347507296e6abdd46fb09de6819daa7aa1672779cf1a |
+| `facts_mas/agents/ar_agent.py` | 4ec27900c7e0db9a342f085e8f35a6b1b3936c8e39be842a7941700cca1c5da7 |
+| `facts_mas/agents/seasonality_agent.py` | 5afcc2d24e7c1f815ce22455d8e50dcb6b88d3f2c7750e8168cf52a7e4969a41 |
+| `facts_mas/agents/macro_agent.py` | 12a5ee3142ee309e0bba08d41abf21361f7fb08c7aceed000f035cba2f07b57d |
+| `facts_mas/run_backtest.py` | b33afa0552cd803ad538611b33f4ecc9e049ddf2f85ba1a8bbb3e64af52b7bb3 |
+| `facts_mas/schema.py` | 76144c365af7d07c4df7aa696fcd58dfc1135dfe1f8f74371c96920720480e9f |
+| `facts_mas/calibration.py` | 9641e3459d6b0cf910148135e2fcc1741fb519757e2561490e139c9a49906b89 |
+| `tests_audit/audit_core.py` | 6481826eb0640c7d604092fbc79d30382bd68d520b084131d1ba15a62db89131 |
+| `audit_reports/phase3_scripts/p3_build_baselines.py` | b5094e271603accf977f43955531682998ee7042397e1858c00c3c1dc19e6d99 |
+| `audit_reports/artifacts/seasonal_w7_r1.pkl` | 3b530099abfe5bedcb994ca809ce8ae4b8e8e5a28bdf94c0c9dd43e560557017 |
+| `aligned_weekly.csv` | 3ab9fa305ad42ad20cbffc83c996cf851644af555c5fd75a2889bd57e2a09836 |
+| `macro_weekly.csv` | bc7ff7fb30a0e4131259184e2fb7d02de9dac310d99fbe47d91f1ef5802685a8 |
+
+Runner sha256 at gate pass: _(recorded when the gate passes)_
+
+## 10. Decisions taken at freeze (2026-10-16)
+
+1. P frozen exactly as in section 1.
+2. Holdout option A (no embargo).
+3. Runner option (a): audit-built, gated; porting to `facts_mas/` after Phase 7.
+4. Phase 7 runs only after Umang confirms co-author sign-off.
