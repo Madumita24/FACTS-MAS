@@ -189,7 +189,8 @@ def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_v
                      bound_targets: bool = False, temperature: float = TEMPERATURE,
                      exclude: Optional[Callable[[Cell], bool]] = None,
                      agents: Optional[list] = None,
-                     min_support_weeks: Optional[int] = None) -> FoldModel:
+                     min_support_weeks: Optional[int] = None,
+                     reference_fn: Optional[Callable[[Cell, int], np.ndarray]] = None) -> FoldModel:
     """min_support_weeks (audit fix 2, default None = production behaviour):
     a (regime, horizon) cell whose validation window holds fewer than this many
     DISTINCT origin weeks of that regime uses the fold weights instead of its
@@ -202,7 +203,9 @@ def build_fold_model(cells: list[Cell], fold, values_fn: ValuesFn = production_v
     by_h = {h: {a: [] for a in agents} for h in HORIZONS}
     by_rh = {(r, h): {a: [] for a in agents} for r in REGIMES for h in HORIZONS}
     for c in val:
-        nm = _mape_frac(c.actuals, c.naive)
+        # skill reference: naive (production) unless reference_fn is given (Phase 5: FA-ETS-d)
+        ref = reference_fn(c, fold.fold) if reference_fn is not None else c.naive
+        nm = _mape_frac(c.actuals, np.asarray(ref, dtype=np.float64))
         if nm is None or nm <= 0:
             continue
         vals = values_fn(c, fold.fold)
