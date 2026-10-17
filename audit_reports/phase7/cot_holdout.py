@@ -14,6 +14,8 @@ What it does
   * Event text: "No significant events recorded." (the FEMA event cache ends in 2025; disclosed).
   * Every API call goes through ModelCheckedClient: the requested model must equal --model and
     response.model must equal --model (logged per call in cot_calls_lag*.csv); a mismatch stops the run.
+  * Transport errors only (429, 5xx, timeouts) are retried, at most 3 attempts with exponential backoff
+    (1 s, 2 s), every attempt logged; parsing and the one conversational correction are unchanged.
   * Failure count and share are logged; above 5% of cells the paired statistics are reported with and
     without CoT (FINAL_CONFIG section 11 item 5).
   * Logs to a JSON run log: model name, the operator-supplied STATED knowledge cutoff (from the provider's
@@ -54,20 +56,45 @@ class ModelCheckedClient:
     every call). Either mismatch stops the run. Pass the exact snapshot name the API reports as --model
     (e.g. a dated gpt-4o-mini snapshot), otherwise the first call stops the run."""
 
-    def __init__(self, client, expected):
+    MAX_ATTEMPTS = 3
+    BASE_DELAY_S = 1.0
+
+    def __init__(self, client, expected, sleep=None):
+        import time
         import types
         self._client, self.expected, self.calls = client, expected, []
+        self._sleep = sleep or time.sleep
         self.chat = types.SimpleNamespace(completions=types.SimpleNamespace(create=self._create))
+
+    @staticmethod
+    def is_transport_error(e):
+        """Retry only rate limits (429), server errors (5xx) and timeouts (FINAL_CONFIG section 11)."""
+        status = getattr(e, "status_code", None)
+        if isinstance(status, int) and (status == 429 or 500 <= status <= 599):
+            return True
+        return "timeout" in type(e).__name__.lower()
 
     def _create(self, **kw):
         if kw.get("model") != self.expected:
             raise ModelMismatch(f"requested model {kw.get('model')!r} != --model {self.expected!r}")
-        resp = self._client.chat.completions.create(**kw)
-        self.calls.append({"requested_model": kw.get("model"), "response_model": getattr(resp, "model", None),
-                           "at": datetime.datetime.now().isoformat(timespec="seconds")})
-        if getattr(resp, "model", None) != self.expected:
-            raise ModelMismatch(f"response.model {getattr(resp, 'model', None)!r} != --model {self.expected!r}")
-        return resp
+        for attempt in range(1, self.MAX_ATTEMPTS + 1):
+            at = datetime.datetime.now().isoformat(timespec="seconds")
+            try:
+                resp = self._client.chat.completions.create(**kw)
+            except Exception as e:
+                retry = self.is_transport_error(e) and attempt < self.MAX_ATTEMPTS
+                self.calls.append({"requested_model": kw.get("model"), "response_model": None, "at": at,
+                                   "attempt": attempt, "error": type(e).__name__,
+                                   "status_code": getattr(e, "status_code", None), "retried": retry})
+                if not retry:
+                    raise
+                self._sleep(self.BASE_DELAY_S * 2 ** (attempt - 1))
+                continue
+            self.calls.append({"requested_model": kw.get("model"), "response_model": getattr(resp, "model", None),
+                               "at": at, "attempt": attempt, "error": None, "status_code": None, "retried": False})
+            if getattr(resp, "model", None) != self.expected:
+                raise ModelMismatch(f"response.model {getattr(resp, 'model', None)!r} != --model {self.expected!r}")
+            return resp
 
 TRAIN_END = pd.Timestamp("2026-02-21")
 NO_EVENTS = "No significant events recorded."
@@ -144,7 +171,8 @@ def main():
     log["n_failures"] = len(log["failures"])
     log["failure_share"] = len(log["failures"]) / max(len(cells), 1)
     log["report_with_and_without_cot"] = log["failure_share"] > FAIL_SHARE_FLAG
-    log["response_models_seen"] = sorted({c["response_model"] for c in client.calls})
+    log["response_models_seen"] = sorted({c["response_model"] for c in client.calls if c["response_model"]})
+    log["transport_retries"] = sum(1 for c in client.calls if c.get("retried"))
     pd.DataFrame(client.calls).to_csv(os.path.join(a.out, f"cot_calls_lag{a.pub_lag}.csv"), index=False)
     pd.DataFrame(rows, columns=["msa", "origin", "horizon", "step", "forecast"]).to_csv(
         os.path.join(a.out, f"cot_forecasts_lag{a.pub_lag}.csv"), index=False)

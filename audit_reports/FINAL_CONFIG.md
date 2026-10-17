@@ -121,3 +121,21 @@ These clarify how section 6 is executed and reported. They do not change the for
 3. **Freeze check.** `git config core.autocrlf false` is set in this clone (2026-10-16); no checkouts before Phase 7; `check_freeze.py` is run immediately before Phase 7.
 4. **TimesFM.** Holdout forecasts for lag 0 and lag 2 are produced as separate files by `audit_reports/phase7/timesfm_holdout.py`, with the 52-week context ending at the information origin (origin, or origin - 2 weeks).
 5. **CoT.** gpt-4o-mini is the primary (and only) model; no second model unless Umang says so before any call. `response.model` is logged for every call and asserted equal to `--model` (pass the exact snapshot name the API reports, or the run stops). The CoT failure count is reported. If more than 5% of holdout cells fail, the paired statistics are reported both with CoT (cells without a CoT forecast dropped for every method) and without CoT (all cells).
+
+### 11.2 Additional Phase 7 rules (Umang, 2026-10-16; committed before any post-cap data is loaded)
+
+A. **Grid start.** Zillow rows dated before 2018-02-03 (the frozen panel's first date) are dropped when building the holdout panels (`build_holdout_panel.py`; recorded in its manifest).
+
+B. **Filled targets.** Report the number of holdout cells whose targets include a forward-filled inventory value (from `filled_rows_{smoothed,raw}.csv`). If there are any, report the primary statistics with and without those cells. Scoring code is unchanged: this is a post-hoc filter on the runner's `cell_losses.csv` (`audit_reports/phase7/filled_target_check.py`).
+
+C. **Revisions.** The fresh vintage is used everywhere. Macro differences (values <= 2026-02-21 vs `aligned_weekly.csv`): reported only. Inventory differences (vs the capped artifacts): count and size reported; flagged **"material"** if more than 1% of pre-cap inventory cells change by more than 0.5%. Never patched, never a reason to stop.
+
+D. **CoT.** The operator passes the exact dated snapshot as `--model` and the provider-documented knowledge cutoff for that snapshot as `--stated-cutoff`. Transport errors only (HTTP 429, 5xx, timeouts) are retried, at most 3 attempts with exponential backoff (1 s, 2 s), each attempt logged; parsing and the single conversational correction are unchanged. (Fake-client tests in `tests_audit/test_phase7_prep.py`.)
+
+E. **FRED key.** The audit may run `build_holdout_panel.py --phase7-go`. The key is read only via `pull_macro.load_api_key`; it is never printed, logged, archived or committed. Error messages are scrubbed of it before re-raising, and an assertion checks that no output file contains the key string.
+
+F. **Scope.** TimesFM: both cuts (smoothed, raw) x lag 0 and lag 2 (4 files). CoT: smoothed cut only, lag 0 and lag 2. **No raw CoT.** (This narrows section 6's general "methods x both cuts" wording for CoT; in the raw-cut table CoT is shown as "not run".)
+
+G. **Phase 7 order** (after Umang confirms co-author sign-off): `check_freeze.py` -> `build_holdout_panel.py --phase7-go` -> TimesFM holdout (4 files) -> CoT run by Umang or Madumita -> `run_holdout.py --holdout --phase7-go` for {smoothed, raw} x {lag 0, lag 2} -> filled-target check -> report H7.1-H7.4 and the secondary analyses -> `SUMMARY.md`.
+
+H. **Machine:** on AC power with sleep disabled for the whole of Phase 7.
