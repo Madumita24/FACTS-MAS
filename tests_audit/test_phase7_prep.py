@@ -211,3 +211,37 @@ def test_rerun_selects_transport_failures_only():
              {"msa": "B", "origin": "2026-03-07", "h": 8, "transport": False}]
     assert ch.select_rerun_cells({"failure_share": 0.10, "failures": fails}, cells) == [cells[0]]
     assert ch.select_rerun_cells({"failure_share": 0.04, "failures": fails}, cells) == []
+
+
+# ── Retry-After hardening: unparseable / HTTP-date falls back; > 60 s is not waited for ─
+
+def test_retry_after_http_date_or_garbage_falls_back_to_backoff():
+    slept = []
+    fake = _Flaky([_RetryAfterErr(429, "Wed, 21 Oct 2026 07:28:00 GMT"), _RetryAfterErr(503, "soon")])
+    c = ch.ModelCheckedClient(fake, "snap-1", sleep=slept.append)
+    c.chat.completions.create(model="snap-1", messages=[])
+    assert slept == [1.0, 2.0] and fake.n == 3
+    assert [x["retry_after_s"] for x in c.calls[:2]] == [None, None]
+
+
+def test_retry_after_over_cap_is_not_waited_and_counts_as_transport_failure():
+    slept = []
+    fake = _Flaky([_RetryAfterErr(429, "120")])
+    c = ch.ModelCheckedClient(fake, "snap-1", sleep=slept.append)
+    with pytest.raises(_RetryAfterErr) as e:
+        c.chat.completions.create(model="snap-1", messages=[])
+    assert slept == [] and fake.n == 1
+    assert c.calls[0]["retried"] is False and "exceeds cap" in c.calls[0]["note"]
+    assert ch.ModelCheckedClient.is_transport_error(e.value)   # recorded as transport: eligible for the re-run pass
+    import cot_baseline as cb
+    old = cb.MODEL
+    try:
+        cb.MODEL = "snap-1"
+        o = pd.Timestamp("2025-06-07")
+        panel = pd.DataFrame({"date": pd.date_range("2024-06-15", periods=52, freq="W-SAT"), "msa": "A",
+                              "inventory_count": 100.0})
+        rows, fails = ch.run_cells([("A", o, 4, o)], panel, ch.ModelCheckedClient(_Flaky([_RetryAfterErr(429, "120")]),
+                                                                                 "snap-1", sleep=slept.append), cb, 0)
+    finally:
+        cb.MODEL = old
+    assert rows == [] and len(fails) == 1 and fails[0]["transport"] is True and slept == []

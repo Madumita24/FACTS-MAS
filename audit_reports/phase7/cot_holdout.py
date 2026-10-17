@@ -15,7 +15,9 @@ What it does
   * Every API call goes through ModelCheckedClient: the requested model must equal --model and
     response.model must equal --model (logged per call in cot_calls_lag*.csv); a mismatch stops the run.
   * Transport errors only (429, 5xx, timeouts, connection errors) are retried, at most 3 attempts with
-    exponential backoff (1 s, 2 s) or at least the Retry-After header if present, every attempt logged;
+    exponential backoff (1 s, 2 s) or at least a numeric Retry-After header if present (an HTTP-date or
+    unparseable header falls back to the backoff; a request over 60 s is not waited for and the cell is
+    recorded as a transport failure, eligible for the single re-run pass), every attempt logged;
     parsing and the one conversational correction are unchanged.
   * If more than 5% of cells fail, exactly one logged re-run pass over cells that failed on transport errors
     (never parse failures) is allowed: --rerun-transport-failures with the same --out, --model, --panel.
@@ -61,6 +63,7 @@ class ModelCheckedClient:
 
     MAX_ATTEMPTS = 3
     BASE_DELAY_S = 1.0
+    RETRY_AFTER_CAP_S = 60.0   # longer requests are not waited for: the cell fails as a transport failure
 
     def __init__(self, client, expected, sleep=None):
         import time
@@ -81,24 +84,18 @@ class ModelCheckedClient:
 
     @staticmethod
     def retry_after_seconds(e):
-        """Seconds requested by a Retry-After header (delta-seconds or HTTP date), or None."""
-        resp = getattr(e, "response", None)
-        headers = getattr(resp, "headers", None) or {}
+        """Seconds requested by a Retry-After header, only if it is a plain number of seconds. An HTTP date or
+        anything unparseable returns None (the caller then uses the normal backoff); this never raises."""
         try:
+            resp = getattr(e, "response", None)
+            headers = getattr(resp, "headers", None) or {}
             val = headers.get("retry-after") or headers.get("Retry-After")
-        except AttributeError:
-            val = None
-        if val is None:
-            return None
-        try:
-            return max(0.0, float(val))
-        except (TypeError, ValueError):
-            from email.utils import parsedate_to_datetime
-            try:
-                dt = parsedate_to_datetime(str(val))
-                return max(0.0, (dt - datetime.datetime.now(dt.tzinfo)).total_seconds())
-            except (TypeError, ValueError):
+            if val is None:
                 return None
+            sec = float(str(val).strip())
+            return sec if sec >= 0 and sec == sec and sec != float("inf") else None
+        except Exception:
+            return None
 
     def _create(self, **kw):
         if kw.get("model") != self.expected:
@@ -110,21 +107,23 @@ class ModelCheckedClient:
             except Exception as e:
                 retry = self.is_transport_error(e) and attempt < self.MAX_ATTEMPTS
                 ra = self.retry_after_seconds(e)
-                wait = None
+                wait, note = None, None
+                if retry and ra is not None and ra > self.RETRY_AFTER_CAP_S:
+                    retry, note = False, f"retry_after {ra:g}s exceeds cap {self.RETRY_AFTER_CAP_S:g}s; not waited"
                 if retry:
                     backoff = self.BASE_DELAY_S * 2 ** (attempt - 1)
                     wait = max(backoff, ra) if ra is not None else backoff
                 self.calls.append({"requested_model": kw.get("model"), "response_model": None, "at": at,
                                    "attempt": attempt, "error": type(e).__name__,
                                    "status_code": getattr(e, "status_code", None), "retried": retry,
-                                   "retry_after_s": ra, "wait_s": wait})
+                                   "retry_after_s": ra, "wait_s": wait, "note": note})
                 if not retry:
                     raise
                 self._sleep(wait)
                 continue
             self.calls.append({"requested_model": kw.get("model"), "response_model": getattr(resp, "model", None),
                                "at": at, "attempt": attempt, "error": None, "status_code": None, "retried": False,
-                               "retry_after_s": None, "wait_s": None})
+                               "retry_after_s": None, "wait_s": None, "note": None})
             if getattr(resp, "model", None) != self.expected:
                 raise ModelMismatch(f"response.model {getattr(resp, 'model', None)!r} != --model {self.expected!r}")
             return resp
