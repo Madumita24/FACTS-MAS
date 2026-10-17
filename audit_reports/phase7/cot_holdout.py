@@ -12,6 +12,10 @@ What it does
     One call per (MSA, origin, horizon) as in the fold-1 run; 52-week context ending at the information
     origin (origin, or origin - 2 weeks with --pub-lag 2, keeping the last h of h + 2 forecast steps).
   * Event text: "No significant events recorded." (the FEMA event cache ends in 2025; disclosed).
+  * Every API call goes through ModelCheckedClient: the requested model must equal --model and
+    response.model must equal --model (logged per call in cot_calls_lag*.csv); a mismatch stops the run.
+  * Failure count and share are logged; above 5% of cells the paired statistics are reported with and
+    without CoT (FINAL_CONFIG section 11 item 5).
   * Logs to a JSON run log: model name, the operator-supplied STATED knowledge cutoff (from the provider's
     documentation), the model's own SELF-REPORTED cutoff (asked once, verbatim answer stored), run date,
     panel sha256, counts and failures. Results count as out-of-sample only if the stated cutoff is before
@@ -37,6 +41,34 @@ os.chdir(REPO)
 import pandas as pd  # noqa: E402
 
 HOLDOUT_START = pd.Timestamp("2026-02-28")
+FAIL_SHARE_FLAG = 0.05
+
+
+class ModelMismatch(RuntimeError):
+    """The model requested or served differs from --model."""
+
+
+class ModelCheckedClient:
+    """Wraps an OpenAI client. Every chat.completions.create call must request exactly `expected` (proves the
+    --model override reaches the API call) and the response's `model` field must equal `expected` (logged for
+    every call). Either mismatch stops the run. Pass the exact snapshot name the API reports as --model
+    (e.g. a dated gpt-4o-mini snapshot), otherwise the first call stops the run."""
+
+    def __init__(self, client, expected):
+        import types
+        self._client, self.expected, self.calls = client, expected, []
+        self.chat = types.SimpleNamespace(completions=types.SimpleNamespace(create=self._create))
+
+    def _create(self, **kw):
+        if kw.get("model") != self.expected:
+            raise ModelMismatch(f"requested model {kw.get('model')!r} != --model {self.expected!r}")
+        resp = self._client.chat.completions.create(**kw)
+        self.calls.append({"requested_model": kw.get("model"), "response_model": getattr(resp, "model", None),
+                           "at": datetime.datetime.now().isoformat(timespec="seconds")})
+        if getattr(resp, "model", None) != self.expected:
+            raise ModelMismatch(f"response.model {getattr(resp, 'model', None)!r} != --model {self.expected!r}")
+        return resp
+
 TRAIN_END = pd.Timestamp("2026-02-21")
 NO_EVENTS = "No significant events recorded."
 
@@ -82,8 +114,8 @@ def main():
     if not (a.panel and a.model and a.stated_cutoff and a.out):
         raise SystemExit("--panel, --model, --stated-cutoff and --out are required")
     import cot_baseline as cb
-    cb.MODEL = a.model
-    client = cb._client()  # reads OPENAI_API_KEY from the operator's environment
+    cb.MODEL = a.model                      # forecast_cot_nexus reads cb.MODEL at call time
+    client = ModelCheckedClient(cb._client(), a.model)  # key read from the operator's environment
     os.makedirs(a.out, exist_ok=False)
     panel = pd.read_csv(a.panel, parse_dates=["date"])
     cells = holdout_cells(panel, a.pub_lag)
@@ -96,7 +128,7 @@ def main():
            "panel": a.panel, "panel_sha256": hashlib.sha256(open(a.panel, "rb").read()).hexdigest(),
            "earliest_holdout_target": str(first_target.date()),
            "out_of_sample": pd.Timestamp(a.stated_cutoff) < first_target,
-           "event_text": NO_EVENTS, "system_prompt": cb.SYSTEM_PROMPT, "n_requests": len(cells), "failures": []}
+           "event_text": NO_EVENTS, "system_prompt": cb.SYSTEM_PROMPT, "n_cells": len(cells), "failures": []}
     rows = []
     for msa, o, h, oi in cells:
         s = panel[panel.msa == msa].sort_values("date").set_index("date")["inventory_count"]
@@ -105,8 +137,15 @@ def main():
             r = cb.forecast_cot_nexus(s, msa, h + a.pub_lag, NO_EVENTS, client=client)
             vals = r["point_forecast"][a.pub_lag:]
             rows += [(msa, o.date(), h, k, max(0.0, float(v))) for k, v in enumerate(vals, start=1)]
+        except ModelMismatch:
+            raise                            # a wrong model stops the run; nothing is written
         except Exception as e:  # recorded, never filled with a fallback
             log["failures"].append({"msa": msa, "origin": str(o.date()), "h": h, "error": str(e)})
+    log["n_failures"] = len(log["failures"])
+    log["failure_share"] = len(log["failures"]) / max(len(cells), 1)
+    log["report_with_and_without_cot"] = log["failure_share"] > FAIL_SHARE_FLAG
+    log["response_models_seen"] = sorted({c["response_model"] for c in client.calls})
+    pd.DataFrame(client.calls).to_csv(os.path.join(a.out, f"cot_calls_lag{a.pub_lag}.csv"), index=False)
     pd.DataFrame(rows, columns=["msa", "origin", "horizon", "step", "forecast"]).to_csv(
         os.path.join(a.out, f"cot_forecasts_lag{a.pub_lag}.csv"), index=False)
     json.dump(log, open(os.path.join(a.out, f"cot_run_log_lag{a.pub_lag}.json"), "w"), indent=1)
