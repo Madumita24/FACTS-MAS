@@ -14,8 +14,11 @@ What it does
   * Event text: "No significant events recorded." (the FEMA event cache ends in 2025; disclosed).
   * Every API call goes through ModelCheckedClient: the requested model must equal --model and
     response.model must equal --model (logged per call in cot_calls_lag*.csv); a mismatch stops the run.
-  * Transport errors only (429, 5xx, timeouts) are retried, at most 3 attempts with exponential backoff
-    (1 s, 2 s), every attempt logged; parsing and the one conversational correction are unchanged.
+  * Transport errors only (429, 5xx, timeouts, connection errors) are retried, at most 3 attempts with
+    exponential backoff (1 s, 2 s) or at least the Retry-After header if present, every attempt logged;
+    parsing and the one conversational correction are unchanged.
+  * If more than 5% of cells fail, exactly one logged re-run pass over cells that failed on transport errors
+    (never parse failures) is allowed: --rerun-transport-failures with the same --out, --model, --panel.
   * Failure count and share are logged; above 5% of cells the paired statistics are reported with and
     without CoT (FINAL_CONFIG section 11 item 5).
   * Logs to a JSON run log: model name, the operator-supplied STATED knowledge cutoff (from the provider's
@@ -68,11 +71,34 @@ class ModelCheckedClient:
 
     @staticmethod
     def is_transport_error(e):
-        """Retry only rate limits (429), server errors (5xx) and timeouts (FINAL_CONFIG section 11)."""
+        """Transport errors only (FINAL_CONFIG section 11.2): HTTP 429, 5xx, timeouts and connection errors
+        (openai.APIConnectionError and its subclass APITimeoutError). Parse failures are never transport errors."""
         status = getattr(e, "status_code", None)
         if isinstance(status, int) and (status == 429 or 500 <= status <= 599):
             return True
-        return "timeout" in type(e).__name__.lower()
+        names = [k.__name__ for k in type(e).__mro__]
+        return any(n == "APIConnectionError" or "timeout" in n.lower() for n in names)
+
+    @staticmethod
+    def retry_after_seconds(e):
+        """Seconds requested by a Retry-After header (delta-seconds or HTTP date), or None."""
+        resp = getattr(e, "response", None)
+        headers = getattr(resp, "headers", None) or {}
+        try:
+            val = headers.get("retry-after") or headers.get("Retry-After")
+        except AttributeError:
+            val = None
+        if val is None:
+            return None
+        try:
+            return max(0.0, float(val))
+        except (TypeError, ValueError):
+            from email.utils import parsedate_to_datetime
+            try:
+                dt = parsedate_to_datetime(str(val))
+                return max(0.0, (dt - datetime.datetime.now(dt.tzinfo)).total_seconds())
+            except (TypeError, ValueError):
+                return None
 
     def _create(self, **kw):
         if kw.get("model") != self.expected:
@@ -83,15 +109,22 @@ class ModelCheckedClient:
                 resp = self._client.chat.completions.create(**kw)
             except Exception as e:
                 retry = self.is_transport_error(e) and attempt < self.MAX_ATTEMPTS
+                ra = self.retry_after_seconds(e)
+                wait = None
+                if retry:
+                    backoff = self.BASE_DELAY_S * 2 ** (attempt - 1)
+                    wait = max(backoff, ra) if ra is not None else backoff
                 self.calls.append({"requested_model": kw.get("model"), "response_model": None, "at": at,
                                    "attempt": attempt, "error": type(e).__name__,
-                                   "status_code": getattr(e, "status_code", None), "retried": retry})
+                                   "status_code": getattr(e, "status_code", None), "retried": retry,
+                                   "retry_after_s": ra, "wait_s": wait})
                 if not retry:
                     raise
-                self._sleep(self.BASE_DELAY_S * 2 ** (attempt - 1))
+                self._sleep(wait)
                 continue
             self.calls.append({"requested_model": kw.get("model"), "response_model": getattr(resp, "model", None),
-                               "at": at, "attempt": attempt, "error": None, "status_code": None, "retried": False})
+                               "at": at, "attempt": attempt, "error": None, "status_code": None, "retried": False,
+                               "retry_after_s": None, "wait_s": None})
             if getattr(resp, "model", None) != self.expected:
                 raise ModelMismatch(f"response.model {getattr(resp, 'model', None)!r} != --model {self.expected!r}")
             return resp
@@ -127,6 +160,34 @@ def dry_run():
     print("context", start, "->", last)
 
 
+def run_cells(cells, panel, client, cb, lag):
+    """Forecast every (msa, origin, h, info_origin) cell. Returns (rows, failures); each failure records whether
+    it was a transport error (eligible for the single re-run pass) or a parse / other failure (never re-run)."""
+    rows, failures = [], []
+    for msa, o, h, oi in cells:
+        s = panel[panel.msa == msa].sort_values("date").set_index("date")["inventory_count"]
+        s = s[s.index <= oi]
+        try:
+            r = cb.forecast_cot_nexus(s, msa, h + lag, NO_EVENTS, client=client)
+            vals = r["point_forecast"][lag:]
+            rows += [(msa, o.date(), h, k, max(0.0, float(v))) for k, v in enumerate(vals, start=1)]
+        except ModelMismatch:
+            raise                            # a wrong model stops the run; nothing is written
+        except Exception as e:  # recorded, never filled with a fallback
+            failures.append({"msa": msa, "origin": str(o.date()), "h": h, "error": f"{type(e).__name__}: {e}",
+                             "transport": bool(ModelCheckedClient.is_transport_error(e))})
+    return rows, failures
+
+
+def select_rerun_cells(log, cells):
+    """FINAL_CONFIG 11.2: one re-run pass, only if the failure share exceeds 5%, only over cells that failed on
+    transport errors. Returns the subset of `cells` to re-run (possibly empty)."""
+    if not log["failure_share"] > FAIL_SHARE_FLAG:
+        return []
+    keys = {(f["msa"], f["origin"], f["h"]) for f in log["failures"] if f.get("transport")}
+    return [c for c in cells if (c[0], str(c[1].date()), c[2]) in keys]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--panel")
@@ -135,6 +196,8 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--pub-lag", type=int, choices=[0, 2], default=0)
     ap.add_argument("--dry-run-prompts", action="store_true")
+    ap.add_argument("--rerun-transport-failures", action="store_true",
+                    help="the single permitted re-run pass over transport-failed cells of an existing --out run")
     a = ap.parse_args()
     if a.dry_run_prompts:
         return dry_run()
@@ -142,10 +205,39 @@ def main():
         raise SystemExit("--panel, --model, --stated-cutoff and --out are required")
     import cot_baseline as cb
     cb.MODEL = a.model                      # forecast_cot_nexus reads cb.MODEL at call time
-    client = ModelCheckedClient(cb._client(), a.model)  # key read from the operator's environment
-    os.makedirs(a.out, exist_ok=False)
     panel = pd.read_csv(a.panel, parse_dates=["date"])
     cells = holdout_cells(panel, a.pub_lag)
+    tag = f"lag{a.pub_lag}"
+    if a.rerun_transport_failures:
+        log_path = os.path.join(a.out, f"cot_run_log_{tag}.json")
+        log = json.load(open(log_path))
+        if log.get("rerun_pass_done"):
+            raise SystemExit("the single re-run pass has already been done for this run")
+        if log["model"] != a.model or log["panel_sha256"] != hashlib.sha256(open(a.panel, "rb").read()).hexdigest():
+            raise SystemExit("re-run must use the same --model and --panel as the original run")
+        todo = select_rerun_cells(log, cells)
+        if not todo:
+            raise SystemExit(f"no re-run allowed: failure share {log['failure_share']:.3%} (rule: > 5%) "
+                             f"or no transport failures")
+        client = ModelCheckedClient(cb._client(), a.model)
+        rows, still = run_cells(todo, panel, client, cb, a.pub_lag)
+        prev = pd.read_csv(os.path.join(a.out, f"cot_forecasts_{tag}.csv"))
+        merged = pd.concat([prev, pd.DataFrame(rows, columns=prev.columns)], ignore_index=True)
+        merged.to_csv(os.path.join(a.out, f"cot_forecasts_{tag}_after_rerun.csv"), index=False)
+        pd.DataFrame(client.calls).to_csv(os.path.join(a.out, f"cot_calls_{tag}_rerun.csv"), index=False)
+        fixed = {(m, str(o), h) for m, o, h, _, _ in rows}
+        after = [f for f in log["failures"] if (f["msa"], f["origin"], f["h"]) not in fixed]
+        log["rerun_pass_done"] = True
+        log["rerun"] = {"run_date": datetime.datetime.now().isoformat(timespec="seconds"), "cells_rerun": len(todo),
+                        "recovered": len(fixed), "still_failing": still, "failures_after_rerun": after}
+        log["failure_share_after_rerun"] = len(after) / max(len(cells), 1)
+        log["report_with_and_without_cot"] = log["failure_share_after_rerun"] > FAIL_SHARE_FLAG
+        json.dump(log, open(log_path, "w"), indent=1)
+        print(json.dumps({"cells_rerun": len(todo), "recovered": len(fixed),
+                          "failure_share_after_rerun": log["failure_share_after_rerun"]}, indent=1))
+        return
+    client = ModelCheckedClient(cb._client(), a.model)  # key read from the operator's environment
+    os.makedirs(a.out, exist_ok=False)
     first_target = min(o for _, o, _, _ in cells) + pd.Timedelta(weeks=1)
     ask = client.chat.completions.create(model=a.model, temperature=0, messages=[
         {"role": "user", "content": "What is your training data knowledge cutoff date? Answer with a month and year only."}])
@@ -155,29 +247,22 @@ def main():
            "panel": a.panel, "panel_sha256": hashlib.sha256(open(a.panel, "rb").read()).hexdigest(),
            "earliest_holdout_target": str(first_target.date()),
            "out_of_sample": pd.Timestamp(a.stated_cutoff) < first_target,
-           "event_text": NO_EVENTS, "system_prompt": cb.SYSTEM_PROMPT, "n_cells": len(cells), "failures": []}
-    rows = []
-    for msa, o, h, oi in cells:
-        s = panel[panel.msa == msa].sort_values("date").set_index("date")["inventory_count"]
-        s = s[s.index <= oi]
-        try:
-            r = cb.forecast_cot_nexus(s, msa, h + a.pub_lag, NO_EVENTS, client=client)
-            vals = r["point_forecast"][a.pub_lag:]
-            rows += [(msa, o.date(), h, k, max(0.0, float(v))) for k, v in enumerate(vals, start=1)]
-        except ModelMismatch:
-            raise                            # a wrong model stops the run; nothing is written
-        except Exception as e:  # recorded, never filled with a fallback
-            log["failures"].append({"msa": msa, "origin": str(o.date()), "h": h, "error": str(e)})
-    log["n_failures"] = len(log["failures"])
-    log["failure_share"] = len(log["failures"]) / max(len(cells), 1)
+           "event_text": NO_EVENTS, "system_prompt": cb.SYSTEM_PROMPT, "n_cells": len(cells)}
+    rows, failures = run_cells(cells, panel, client, cb, a.pub_lag)
+    log["failures"] = failures
+    log["n_failures"] = len(failures)
+    log["n_transport_failures"] = sum(f["transport"] for f in failures)
+    log["failure_share"] = len(failures) / max(len(cells), 1)
     log["report_with_and_without_cot"] = log["failure_share"] > FAIL_SHARE_FLAG
+    log["rerun_allowed"] = bool(log["failure_share"] > FAIL_SHARE_FLAG and log["n_transport_failures"] > 0)
+    log["rerun_pass_done"] = False
     log["response_models_seen"] = sorted({c["response_model"] for c in client.calls if c["response_model"]})
     log["transport_retries"] = sum(1 for c in client.calls if c.get("retried"))
-    pd.DataFrame(client.calls).to_csv(os.path.join(a.out, f"cot_calls_lag{a.pub_lag}.csv"), index=False)
+    pd.DataFrame(client.calls).to_csv(os.path.join(a.out, f"cot_calls_{tag}.csv"), index=False)
     pd.DataFrame(rows, columns=["msa", "origin", "horizon", "step", "forecast"]).to_csv(
-        os.path.join(a.out, f"cot_forecasts_lag{a.pub_lag}.csv"), index=False)
-    json.dump(log, open(os.path.join(a.out, f"cot_run_log_lag{a.pub_lag}.json"), "w"), indent=1)
-    print(json.dumps({k: v for k, v in log.items() if k != "failures"}, indent=1), "\nfailures:", len(log["failures"]))
+        os.path.join(a.out, f"cot_forecasts_{tag}.csv"), index=False)
+    json.dump(log, open(os.path.join(a.out, f"cot_run_log_{tag}.json"), "w"), indent=1)
+    print(json.dumps({k: v for k, v in log.items() if k != "failures"}, indent=1), "\nfailures:", len(failures))
 
 
 if __name__ == "__main__":

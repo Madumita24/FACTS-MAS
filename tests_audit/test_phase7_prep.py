@@ -155,3 +155,59 @@ def test_filled_target_flags():
                       "last_target": ["2026-04-04", "2026-05-02", "2026-04-04"], "h": [4, 4, 4]})
     filled = pd.DataFrame({"date": ["2026-03-21"], "msa": ["A"], "filled_value": [1.0]})
     assert ftc.flag_cells(D, filled).tolist() == [True, False, False]
+
+
+# ── filled-target check refuses a cut mismatch ─────────────────────────────
+
+def test_filled_target_cut_check(tmp_path):
+    import json
+    import filled_target_check as ftc
+    res = tmp_path / "results_x"
+    res.mkdir()
+    (res / "run_meta.json").write_text(json.dumps({"panel": "audit_reports/phase7/archive_20261101/panel_raw.csv"}))
+    assert ftc.check_cut(str(res), "archive_20261101/filled_rows_raw.csv") == "raw"
+    with pytest.raises(SystemExit):
+        ftc.check_cut(str(res), "archive_20261101/filled_rows_smoothed.csv")
+    with pytest.raises(SystemExit):
+        ftc.check_cut(str(res), "archive_20261101/filled_rows.csv")
+
+
+# ── CoT: connection errors are transport errors; Retry-After honoured ─────
+
+class APIConnectionError(Exception):  # same class name as openai's connection error
+    pass
+
+
+class _RetryAfterErr(Exception):
+    def __init__(self, code, retry_after):
+        super().__init__(f"status {code}")
+        self.status_code = code
+        self.response = types.SimpleNamespace(headers={"retry-after": retry_after})
+
+
+def test_connection_error_is_retried():
+    slept = []
+    fake = _Flaky([APIConnectionError("reset")])
+    c = ch.ModelCheckedClient(fake, "snap-1", sleep=slept.append)
+    c.chat.completions.create(model="snap-1", messages=[])
+    assert fake.n == 2 and slept == [1.0] and c.calls[0]["error"] == "APIConnectionError"
+
+
+def test_retry_after_header_sets_minimum_wait():
+    slept = []
+    fake = _Flaky([_RetryAfterErr(429, "7"), _RetryAfterErr(503, "0.5")])
+    c = ch.ModelCheckedClient(fake, "snap-1", sleep=slept.append)
+    c.chat.completions.create(model="snap-1", messages=[])
+    assert slept == [7.0, 2.0]                       # max(backoff 1, 7) then max(backoff 2, 0.5)
+    assert [x["retry_after_s"] for x in c.calls[:2]] == [7.0, 0.5]
+
+
+# ── CoT: the single re-run pass selects transport failures only, only above 5% ─
+
+def test_rerun_selects_transport_failures_only():
+    o1, o2 = pd.Timestamp("2026-03-07"), pd.Timestamp("2026-03-14")
+    cells = [("A", o1, 4, o1), ("A", o2, 4, o2), ("B", o1, 8, o1)]
+    fails = [{"msa": "A", "origin": "2026-03-07", "h": 4, "transport": True},
+             {"msa": "B", "origin": "2026-03-07", "h": 8, "transport": False}]
+    assert ch.select_rerun_cells({"failure_share": 0.10, "failures": fails}, cells) == [cells[0]]
+    assert ch.select_rerun_cells({"failure_share": 0.04, "failures": fails}, cells) == []

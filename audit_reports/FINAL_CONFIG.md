@@ -56,6 +56,7 @@ Note: the authors withdrew the regime-conditioning *claim* (C6). The Router mech
 - **Holdout origins: 2026-02-28 onward** (no embargo), every week with a complete h-week target in the refreshed data. With data to 2026-10-03 that is about 28 / 24 / 19 origins x 15 MSAs at 4 / 8 / 13 weeks.
 - **Methods:** naive, seasonal naive, Naive2 (seasonal channel), FA-ETS-d, P, B5, TimesFM, CoT. No Phase 5 winner exists.
 - **Cuts:** smoothed (primary) and raw, both in the main table.
+- Which methods run on which cut and lag, and further execution rules: see section 11.2 (CoT runs on the smoothed cut only).
 - **Statistics:** panel DM (Newey-West lag h-1); per-MSA DM (HLN, BH); paired moving block bootstrap over whole weeks, B = 5,000, seed 20261016, block length L = h, except where h > T/2, where L = floor(T/2) and the CI is flagged as unreliable; MCS (T_max) as Phase 4.
 - **Pre-registered holdout hypotheses (smoothed cut, primary):**
   - H7.1 P beats naive at every horizon: pooled MAPE lower and the 95% paired block CI of P - naive below 0.
@@ -126,16 +127,18 @@ These clarify how section 6 is executed and reported. They do not change the for
 
 A. **Grid start.** Zillow rows dated before 2018-02-03 (the frozen panel's first date) are dropped when building the holdout panels (`build_holdout_panel.py`; recorded in its manifest).
 
-B. **Filled targets.** Report the number of holdout cells whose targets include a forward-filled inventory value (from `filled_rows_{smoothed,raw}.csv`). If there are any, report the primary statistics with and without those cells. Scoring code is unchanged: this is a post-hoc filter on the runner's `cell_losses.csv` (`audit_reports/phase7/filled_target_check.py`).
+B. **Filled targets.** Report the number of holdout cells whose targets include a forward-filled inventory value (from `filled_rows_{smoothed,raw}.csv`). If there are any, report the primary statistics with and without those cells. Scoring code is unchanged: this is a post-hoc filter on the runner's `cell_losses.csv` (`audit_reports/phase7/filled_target_check.py`). The script reads the run's cut from `run_meta.json` (panel path) and refuses if the filled-rows file is for a different cut.
 
 C. **Revisions.** The fresh vintage is used everywhere. Macro differences (values <= 2026-02-21 vs `aligned_weekly.csv`): reported only. Inventory differences (vs the capped artifacts): count and size reported; flagged **"material"** if more than 1% of pre-cap inventory cells change by more than 0.5%. Never patched, never a reason to stop.
 
-D. **CoT.** The operator passes the exact dated snapshot as `--model` and the provider-documented knowledge cutoff for that snapshot as `--stated-cutoff`. Transport errors only (HTTP 429, 5xx, timeouts) are retried, at most 3 attempts with exponential backoff (1 s, 2 s), each attempt logged; parsing and the single conversational correction are unchanged. (Fake-client tests in `tests_audit/test_phase7_prep.py`.)
+D. **CoT.** The operator passes the exact dated snapshot as `--model` and the provider-documented knowledge cutoff for that snapshot as `--stated-cutoff`. Transport errors only (HTTP 429, 5xx, timeouts, and connection errors, i.e. `APIConnectionError`) are retried, at most 3 attempts with exponential backoff (1 s, 2 s); if a `Retry-After` header is present the wait is at least that long; each attempt is logged; parsing and the single conversational correction are unchanged. (Fake-client tests in `tests_audit/test_phase7_prep.py`.)
 
 E. **FRED key.** The audit may run `build_holdout_panel.py --phase7-go`. The key is read only via `pull_macro.load_api_key`; it is never printed, logged, archived or committed. Error messages are scrubbed of it before re-raising, and an assertion checks that no output file contains the key string.
 
-F. **Scope.** TimesFM: both cuts (smoothed, raw) x lag 0 and lag 2 (4 files). CoT: smoothed cut only, lag 0 and lag 2. **No raw CoT.** (This narrows section 6's general "methods x both cuts" wording for CoT; in the raw-cut table CoT is shown as "not run".)
+F. **Scope.** TimesFM: both cuts (smoothed, raw) x lag 0 and lag 2 (4 files). CoT: smoothed cut only, lag 0 and lag 2. **No raw CoT.** (This narrows section 6's general "methods x both cuts" wording for CoT; the narrowing stands, Umang 2026-10-16.) In the raw-cut table write: "CoT: not run on the raw cut (scope fixed in FINAL_CONFIG 11.2 before holdout data was loaded)".
 
 G. **Phase 7 order** (after Umang confirms co-author sign-off): `check_freeze.py` -> `build_holdout_panel.py --phase7-go` -> TimesFM holdout (4 files) -> CoT run by Umang or Madumita -> `run_holdout.py --holdout --phase7-go` for {smoothed, raw} x {lag 0, lag 2} -> filled-target check -> report H7.1-H7.4 and the secondary analyses -> `SUMMARY.md`.
 
 H. **Machine:** on AC power with sleep disabled for the whole of Phase 7.
+
+I. **CoT re-run pass.** If the CoT failure share is above 5%, exactly one logged re-run pass is allowed over the cells that failed on transport errors only (never parse failures): `cot_holdout.py --rerun-transport-failures` with the same `--out`, `--model` and `--panel`; it refuses a second pass. Then report as already specified: the original and post-re-run failure counts, and the paired statistics with and without CoT if the post-re-run failure share is still above 5%.
