@@ -60,3 +60,12 @@ Phase 4 methods (`stats_lib.py`): panel DM (Newey-West lag h-1), paired moving b
 - U3. P-UI beats naive at every horizon (prediction: yes) but is not better than FA-ETS-d at any horizon (prediction: not better).
 - U4. Handoff: under R1c-UI, the temporal weight falls and the seasonal weight rises from 4 to 13 weeks (prediction: yes).
 - U5. Including COVID cells raises every method's MAPE substantially and can reverse rankings (prediction: yes).
+
+## Addendum A (2026-10-16): validation-selected single model (SelBest-UI), added after the Phase 6 UI results
+
+**Disclosure:** this check was requested by Umang and added **after** the Phase 6 UI results were seen (we already knew P-UI beat FA-ETS-d at 8 and 13 weeks and nearly tied the seasonal channel). It is the housing SelBest-model analogue, with the same candidate set and rule, fixed here before it is run.
+
+- **Candidates:** the housing SelBest-model set {naive, seasonal naive, Naive2 (seasonal channel), Holt, Holt-d, FA-ETS, FA-ETS-d, Theta (factor-adjusted), macro, intrinsic}. The UI domain has no intrinsic channel, so the set is the other nine. Definitions as in `phase3_log.md` (window-7 factors computed at the origin; ETS / Theta fitted once per origin and sliced).
+- **Rule:** per (fold, horizon), the single candidate with the lowest mean standalone MAPE over that fold's validation cells at that horizon (origins in [train_end - 104 weeks, train_end], last target <= train_end). Primary analysis excludes COVID-window cells from the selection and from scoring; secondary includes them. Ties: first in the list order above.
+- **Comparison:** P-UI and B5-UI vs SelBest-UI on the same test cells (CLEANBLEED): pooled MAPE, per-fold MAPE, paired block-bootstrap CI (L = 13, B = 5,000), panel DM (Newey-West lag h-1), per-state DM (HLN, BH). "Beats" means lower pooled test MAPE; significance is reported separately.
+- **Predictions:** SelBest-UI picks Naive2 or an FA-ETS variant in most (fold, horizon) cells; P-UI is not significantly different from SelBest-UI at any horizon.
