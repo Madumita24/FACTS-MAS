@@ -40,6 +40,7 @@ Numbers are TEST, CLEANBLEED, smoothed cut, unless stated.
 | B11 | Sec. 4 (seasonal channel) | Ratio-to-moving-average seasonal agent | The seasonal channel is exactly M4's Naive2 with leakage-safe window-7 factors; window 7 was re-selected on validation (window 5 had been chosen on fold-6 test incl. reserved-window cells) | P1 F1.4(a), F1.13; P3 F3.6 | Name it Naive2; report the window and how it was selected |
 | B12 | Data section | Target described as housing inventory | Zillow's smoothed series (a four-week trailing average per Zillow's 2020 notes) | `pull_zillow.py:9`; P5 F5.8 | State the cut; raw results in the main table |
 | B13 | l.63-64 | "models are trained only on observations available through that week" | Zillow posts each week 7-13 days later; every method treats inventory at t as known at t | P5 F5.7; claim C27 | Disclose |
+| B15 | Methods (numerical reproducibility) | Not stated | The 4-week P depends on the Holt (ETS) optimizer: refitting in the pinned environment vs the August cache moves 4-week P by up to 0.001 MAPE pooled (max 0.039 in one cell); 8 and 13 weeks are bit-exact. Gate criterion v2 accepted (Umang, 2026-10-16) | `phase7/gate_record.json`; P6 F6.2 | Methods note: "4-week results are reproducible to +/-0.001 MAPE (optimizer tolerance); 8 and 13 weeks exactly" |
 | B14 | Sec. 4 (channels) | Five channels in the housing forecast | Event and intrinsic retired from the forecast path (both calibrated to null); production uses temporal, seasonal and exogenous; at 8 and 13 weeks the temporal channel is FA-ETS-d | `FINAL_CONFIG.md` | Describe the frozen configuration; keep the retired channels as tested nulls |
 
 ## C. Protocol claims
@@ -76,3 +77,14 @@ Numbers are TEST, CLEANBLEED, smoothed cut, unless stated.
 |---|---|---|
 | F1 | Event confidence gate | The reference doc says "< 0.60"; the code (`event_agent.py:147-168`) and the paper (l.650) both use **<= 0.60**. The reference doc is wrong, not the paper. |
 | F2 | Spillover | Marked "Built"; it ships switched off. |
+
+## G. Resolutions (Umang, 2026-10-16)
+
+| Item | Resolution |
+|---|---|
+| B9 (NEXUS modifications A-D) | **Removed from this paper**; possible separate paper. Section 2.4 should no longer present them as FACTS-MAS capabilities. |
+| A4 (adaptive vs adaptive-granular, Table 12) | **Removed** from the paper. |
+| A6 (event duration grid B) | **Dropped** unless the original script turns up. |
+| E4 (listing-flow channel) | **Included** in the paper as a tested null. |
+| C17 in the claims file (temporal-seasonal handoff) | **Withdrawn**: it replicates in neither domain (housing: only with a non-seasonal temporal channel; UI: absent). |
+| B15 (numerical tolerance) | Added as a methods note (gate v2 accepted). |

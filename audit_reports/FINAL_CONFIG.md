@@ -111,3 +111,13 @@ Runner sha256 at gate pass: `06dee8fd40831734adbdc706a75ed160494c07a2d236ee3694d
 2. Holdout option A (no embargo).
 3. Runner option (a): audit-built, gated; porting to `facts_mas/` after Phase 7.
 4. Phase 7 runs only after Umang confirms co-author sign-off.
+
+## 11. Phase 7 pre-run clarifications (Umang, 2026-10-16; committed before any Phase 7 step is run)
+
+These clarify how section 6 is executed and reported. They do not change the forecast path (section 9 hashes unchanged).
+
+1. **Confirmatory vs descriptive.** With about 19 origins at 13 weeks, every 13-week holdout result (including H7.1, H7.2 and H7.3 at 13 weeks) is **descriptive only** and carries the unreliable-CI flag. Confirmatory weight sits on 4 and 8 weeks.
+2. **Data build.** The holdout panels are built by a separate script, `audit_reports/phase7/build_holdout_panel.py` (the frozen runner is not touched): fresh Zillow smoothed and raw inventory and fresh FRED pulls, assembled with the `align_data.py` / `pull_macro.py` logic and the same publication lags (FFR +32 d, UNRATE +35 d, CPI +42 d, mortgage weekly, as-of join backward). Every download is archived with sha256. **Revision check:** every value dated on or before 2026-02-21 must equal the capped artifacts (inventory: `zillow_{sm,raw}_vintage20261015_capped20260221.csv`; macro: `aligned_weekly.csv` rows <= 2026-02-21). Any difference is reported in full, never hidden or patched.
+3. **Freeze check.** `git config core.autocrlf false` is set in this clone (2026-10-16); no checkouts before Phase 7; `check_freeze.py` is run immediately before Phase 7.
+4. **TimesFM.** Holdout forecasts for lag 0 and lag 2 are produced as separate files by `audit_reports/phase7/timesfm_holdout.py`, with the 52-week context ending at the information origin (origin, or origin - 2 weeks).
+5. **CoT.** gpt-4o-mini is the primary (and only) model; no second model unless Umang says so before any call. `response.model` is logged for every call and asserted equal to `--model` (pass the exact snapshot name the API reports, or the run stops). The CoT failure count is reported. If more than 5% of holdout cells fail, the paired statistics are reported both with CoT (cells without a CoT forecast dropped for every method) and without CoT (all cells).
