@@ -142,3 +142,7 @@ G. **Phase 7 order** (after Umang confirms co-author sign-off): `check_freeze.py
 H. **Machine:** on AC power with sleep disabled for the whole of Phase 7.
 
 I. **CoT re-run pass.** If the CoT failure share is above 5%, exactly one logged re-run pass is allowed over the cells that failed on transport errors only (never parse failures): `cot_holdout.py --rerun-transport-failures` with the same `--out`, `--model` and `--panel`; it refuses a second pass. Then report as already specified: the original and post-re-run failure counts, and the paired statistics with and without CoT if the post-re-run failure share is still above 5%.
+
+### 11.3 Phase 7 authorisation
+
+Authorisation: Umang Bid, 2026-10-20; co-author sign-off waived by the operator.
