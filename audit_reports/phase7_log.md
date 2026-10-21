@@ -20,3 +20,10 @@
    - Revision check: 0 differences on or before 2026-02-21, macro and inventory. Inventory: 6,315 pre-cap cells per cut, 0 changed, MATERIAL = false on both cuts.
    - Filled rows: 9 smoothed, 20 raw, all dated 2018-2023. None after 2026-02-21, so no holdout target can contain a filled value.
    - Secret check: "FRED key absent from all 13 output files".
+7. TimesFM holdout (`facts-timesfm` env, `timesfm_holdout.py`), 2026-10-20 23:51 to 2026-10-21 00:13, all exit 0. Output in `audit_reports/phase7/timesfm_20261020/`. Each file: 435 (msa, origin) contexts, 8,640 rows, 0 NaN, origins 2026-02-28 to 2026-09-12, h in {4, 8, 13}.
+   - `timesfm_holdout_smoothed_lag0.csv` 23d82094ca6190c2d582d156497925203a898a0ac8105e330587944bb9d14c04
+   - `timesfm_holdout_smoothed_lag2.csv` 68d9a043307750a7897838ced28815a7f1bc0ce881859e5e264ce4f10ed97d6a
+   - `timesfm_holdout_raw_lag0.csv` 9b7499ee0cb3a7e2757f7609a04420c95927b70b9d7258c1b595dfec8f7b4515
+   - `timesfm_holdout_raw_lag2.csv` d1de51e8aa4412c9f72a9049f07b19b0560d0ab7d3bedba04117c30e4894fb79
+   - Holdout grid: 29 / 25 / 20 origins at 4 / 8 / 13 weeks (data to 2026-10-10, one week more than the 28 / 24 / 19 estimated in section 6), 1,110 cells per cut and lag.
+8. STOP for CoT (operator run, smoothed cut, lag 0 and lag 2).
