@@ -32,7 +32,7 @@ All three include the 165 fold-6 cells whose targets fall in Jan-Feb 2026, insid
 
 ## 3. What changed in the repository
 
-| Area | Before (`main` 0a1aec5) | After (branch `audit-oct2026`, 43 commits) |
+| Area | Before (`main` 0a1aec5) | After (branch `audit-oct2026`, 41 commits) |
 |---|---|---|
 | Production code (`facts_mas/`, root agents) | As written | **Unchanged.** 0 lines modified or deleted. |
 | Audit code | None | `tests_audit/` (guarded loader, reserved-window guard, fast weighting mirror pinned bit-for-bit to production, leakage tests), `audit_reports/phase*_scripts/`, frozen runner `audit_reports/phase7/run_holdout.py` |
