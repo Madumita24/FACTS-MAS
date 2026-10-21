@@ -12,3 +12,11 @@
    - FRED step failed: `RuntimeError: FRED_API_KEY not found in environment or .env file` (no env var, no `.env` in repo or parent). Exit 1.
    - The panel build, revision check and secret check did not run. No post-cap value was parsed, summarised or scored.
    - Status: BLOCKED on the FRED key. This archive is partial and kept as is. The re-run must use a new archive directory (the script refuses an existing one). Both archives get reported.
+5. Operator added `FACTS-MAS/.env` (45 bytes, git-ignored; not opened by the audit).
+6. `build_holdout_panel.py --phase7-go --archive-dir ../facts_mas_phase7_archive/archive_20261020b`, built 2026-10-20 23:51, exit 0.
+   - Zillow downloads are byte-identical to the partial archive in step 4 (same sha256 for both files): no vintage change between the two attempts.
+   - Panels: smoothed and raw, each 6,810 rows, 15 MSAs, 2018-02-03 to 2026-10-10, 0 NaN. sha256 `panel_smoothed.csv` 282e9d32...5f1d, `panel_raw.csv` bb7b73b8...d454 (full hashes in `manifest.json`).
+   - Grid start: rows before 2018-02-03 dropped (smoothed file starts 2018-01-27, raw 2018-01-06).
+   - Revision check: 0 differences on or before 2026-02-21, macro and inventory. Inventory: 6,315 pre-cap cells per cut, 0 changed, MATERIAL = false on both cuts.
+   - Filled rows: 9 smoothed, 20 raw, all dated 2018-2023. None after 2026-02-21, so no holdout target can contain a filled value.
+   - Secret check: "FRED key absent from all 13 output files".
