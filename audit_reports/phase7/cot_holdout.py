@@ -51,6 +51,19 @@ HOLDOUT_START = pd.Timestamp("2026-02-28")
 FAIL_SHARE_FLAG = 0.05
 
 
+# gpt-5.6-luna list price per million tokens (OpenAI docs, FINAL_CONFIG 11.4); used only for the preflight estimate
+PRICE_IN_PER_M, PRICE_OUT_PER_M = 0.20, 1.20
+
+
+def harden_client(base):
+    """FINAL_CONFIG 11.4 transport settings, applied to the OpenAI client from cot_baseline._client():
+    * Accept-Encoding gzip/deflate only: httpx2 otherwise asks for brotli, and the installed brotli 1.0.9 cannot
+      decode it (TypeError: process() takes no keyword arguments, first attempt 2026-10-22 00:29);
+    * max_retries=0: no hidden SDK retries, so ModelCheckedClient is the only, logged retry layer (11.2 D);
+    * 180 s per-request timeout (a timeout is a transport error)."""
+    return base.with_options(default_headers={"Accept-Encoding": "gzip, deflate"}, max_retries=0, timeout=180.0)
+
+
 class ModelMismatch(RuntimeError):
     """The model requested or served differs from --model."""
 
@@ -127,9 +140,12 @@ class ModelCheckedClient:
                     raise
                 self._sleep(wait)
                 continue
+            u = getattr(resp, "usage", None)
             self.calls.append({"requested_model": kw.get("model"), "response_model": getattr(resp, "model", None),
                                "at": at, "attempt": attempt, "error": None, "status_code": None, "retried": False,
-                               "retry_after_s": None, "wait_s": None, "note": None})
+                               "retry_after_s": None, "wait_s": None, "note": None,
+                               "prompt_tokens": getattr(u, "prompt_tokens", None),
+                               "completion_tokens": getattr(u, "completion_tokens", None)})
             if getattr(resp, "model", None) != self.expected:
                 raise ModelMismatch(f"response.model {getattr(resp, 'model', None)!r} != --model {self.expected!r}")
             return resp
@@ -165,25 +181,85 @@ def dry_run():
     print("context", start, "->", last)
 
 
-def run_cells(cells, panel, client, cb, lag):
+def load_progress(path):
+    """Read a JSONL progress file written by run_cells. Returns (rows, failures, calls, done_keys, bad_lines).
+    A line that does not parse (e.g. cut off by a crash mid-write) is skipped, so that cell is simply redone."""
+    rows, failures, calls, done, bad = [], [], [], set(), 0
+    if not os.path.exists(path):
+        return rows, failures, calls, done, bad
+    for line in open(path, encoding="utf-8"):
+        try:
+            r = json.loads(line)
+        except ValueError:
+            bad += 1
+            continue
+        done.add((r["msa"], r["origin"], r["h"]))
+        calls += r.get("calls", [])
+        if "values" in r:
+            rows += [(r["msa"], r["origin"], r["h"], k, v) for k, v in enumerate(r["values"], start=1)]
+        else:
+            failures.append(r["failure"])
+    return rows, failures, calls, done, bad
+
+
+def preflight(cb, a):
+    """Two real calls, pre-cap data only. Prints what the paid run depends on; writes no result file."""
+    client = ModelCheckedClient(harden_client(cb._client()), a.model, reasoning_effort=a.reasoning_effort)
+    ask = client.chat.completions.create(model=a.model, temperature=0, messages=[
+        {"role": "user", "content": "What is your training data knowledge cutoff date? Answer with a month and year only."}])
+    p = pd.read_csv("aligned_weekly.csv", parse_dates=["date"])
+    s = p[(p.msa == "Phoenix") & (p.date <= pd.Timestamp("2025-06-07"))].sort_values("date").set_index("date")[
+        "inventory_count"]
+    r = cb.forecast_cot_nexus(s, "Phoenix", 4, NO_EVENTS, client=client)
+    fc = [c for c in client.calls[1:] if c["error"] is None]
+    tin = sum(c["prompt_tokens"] or 0 for c in fc) / max(len(fc), 1)
+    tout = sum(c["completion_tokens"] or 0 for c in fc) / max(len(fc), 1)
+    per_lag = 1110 * (tin * PRICE_IN_PER_M + tout * PRICE_OUT_PER_M) / 1e6
+    print("PREFLIGHT OK")
+    print(" response.model:", sorted({c["response_model"] for c in client.calls if c["response_model"]}))
+    print(" self-reported cutoff:", ask.choices[0].message.content)
+    print(" Phoenix 2025-06-07 h=4 forecast:", r["point_forecast"], "| attempts:", r["attempts"])
+    print(f" tokens per forecast call: in {tin:.0f}, out {tout:.0f}; estimated cost about ${per_lag:.2f} per lag "
+          f"(1,110 cells; more if 8/13-week answers are longer)")
+
+
+def run_cells(cells, panel, client, cb, lag, progress=None):
     """Forecast every (msa, origin, h, info_origin) cell. Returns (rows, failures); each failure records whether
-    it was a transport error (eligible for the single re-run pass) or a parse / other failure (never re-run)."""
+    it was a transport error (eligible for the single re-run pass) or a parse / other failure (never re-run).
+    With `progress`, each finished cell (values or failure, plus its API calls) is appended to that JSONL file and
+    flushed to disk immediately, so a crash loses at most the cell in flight (see --resume)."""
     import sys
     import time
     rows, failures = [], []
+    if progress and os.path.exists(progress) and os.path.getsize(progress):
+        with open(progress, "rb+") as f:      # a crash can leave a cut-off last line: start a fresh line after it
+            f.seek(-1, os.SEEK_END)
+            if f.read(1) != b"\n":
+                f.write(b"\n")
     t0, n = time.time(), len(cells)
     for i, (msa, o, h, oi) in enumerate(cells, start=1):
         s = panel[panel.msa == msa].sort_values("date").set_index("date")["inventory_count"]
         s = s[s.index <= oi]
+        n_calls = len(getattr(client, "calls", []))
+        rec = {"msa": msa, "origin": str(o.date()), "h": h}
         try:
             r = cb.forecast_cot_nexus(s, msa, h + lag, NO_EVENTS, client=client)
-            vals = r["point_forecast"][lag:]
-            rows += [(msa, o.date(), h, k, max(0.0, float(v))) for k, v in enumerate(vals, start=1)]
+            vals = [max(0.0, float(v)) for v in r["point_forecast"][lag:]]
+            rows += [(msa, o.date(), h, k, v) for k, v in enumerate(vals, start=1)]
+            rec["values"] = vals
         except ModelMismatch:
-            raise                            # a wrong model stops the run; nothing is written
+            raise                            # a wrong model stops the run
         except Exception as e:  # recorded, never filled with a fallback
-            failures.append({"msa": msa, "origin": str(o.date()), "h": h, "error": f"{type(e).__name__}: {e}",
-                             "transport": bool(ModelCheckedClient.is_transport_error(e))})
+            fail = {"msa": msa, "origin": str(o.date()), "h": h, "error": f"{type(e).__name__}: {e}",
+                    "transport": bool(ModelCheckedClient.is_transport_error(e))}
+            failures.append(fail)
+            rec["failure"] = fail
+        if progress:
+            rec["calls"] = getattr(client, "calls", [])[n_calls:]
+            with open(progress, "a", encoding="utf-8") as f:
+                f.write(json.dumps(rec, default=str) + "\n")
+                f.flush()
+                os.fsync(f.fileno())
         el = time.time() - t0
         eta = el / i * (n - i)
         print(f"[{i}/{n}] {msa} {o.date()} h={h} failures={len(failures)} "
@@ -208,6 +284,12 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--pub-lag", type=int, choices=[0, 2], default=0)
     ap.add_argument("--dry-run-prompts", action="store_true")
+    ap.add_argument("--preflight", action="store_true",
+                    help="2 real API calls on PRE-CAP data (cutoff question + one Phoenix 2025-06-07 forecast); "
+                         "checks connection, model name and parsing, prints a cost estimate; writes nothing")
+    ap.add_argument("--resume", action="store_true",
+                    help="continue an interrupted run in the same --out (same --model, --panel, --reasoning-effort, "
+                         "--pub-lag); finished cells are not called again")
     ap.add_argument("--reasoning-effort", choices=["none", "low", "medium", "high"], default=None,
                     help="reasoning models only (FINAL_CONFIG 11.4): sent as reasoning_effort; temperature is omitted")
     ap.add_argument("--rerun-transport-failures", action="store_true",
@@ -215,10 +297,14 @@ def main():
     a = ap.parse_args()
     if a.dry_run_prompts:
         return dry_run()
-    if not (a.panel and a.model and a.stated_cutoff and a.out):
+    if a.preflight and not a.model:
+        raise SystemExit("--preflight needs --model (and the same --reasoning-effort as the real run)")
+    if not a.preflight and not (a.panel and a.model and a.stated_cutoff and a.out):
         raise SystemExit("--panel, --model, --stated-cutoff and --out are required")
     import cot_baseline as cb
     cb.MODEL = a.model                      # forecast_cot_nexus reads cb.MODEL at call time
+    if a.preflight:
+        return preflight(cb, a)
     panel = pd.read_csv(a.panel, parse_dates=["date"])
     cells = holdout_cells(panel, a.pub_lag)
     tag = f"lag{a.pub_lag}"
@@ -235,7 +321,7 @@ def main():
                              f"or no transport failures")
         if log.get("reasoning_effort") != a.reasoning_effort:
             raise SystemExit("re-run must use the same --reasoning-effort as the original run")
-        client = ModelCheckedClient(cb._client(), a.model, reasoning_effort=a.reasoning_effort)
+        client = ModelCheckedClient(harden_client(cb._client()), a.model, reasoning_effort=a.reasoning_effort)
         rows, still = run_cells(todo, panel, client, cb, a.pub_lag)
         prev = pd.read_csv(os.path.join(a.out, f"cot_forecasts_{tag}.csv"))
         merged = pd.concat([prev, pd.DataFrame(rows, columns=prev.columns)], ignore_index=True)
@@ -252,20 +338,47 @@ def main():
         print(json.dumps({"cells_rerun": len(todo), "recovered": len(fixed),
                           "failure_share_after_rerun": log["failure_share_after_rerun"]}, indent=1))
         return
-    client = ModelCheckedClient(cb._client(), a.model, reasoning_effort=a.reasoning_effort)  # key read from the operator's environment
-    os.makedirs(a.out, exist_ok=False)
+    client = ModelCheckedClient(harden_client(cb._client()), a.model,
+                                reasoning_effort=a.reasoning_effort)  # key read from the operator's environment
+    header_path = os.path.join(a.out, f"cot_run_header_{tag}.json")
+    progress_path = os.path.join(a.out, f"cot_progress_{tag}.jsonl")
+    panel_sha = hashlib.sha256(open(a.panel, "rb").read()).hexdigest()
+    if a.resume:
+        if not os.path.isdir(a.out):
+            raise SystemExit(f"--resume: {a.out} does not exist")
+        if os.path.exists(os.path.join(a.out, f"cot_run_log_{tag}.json")):
+            raise SystemExit("--resume: this run already finished")
+    else:
+        os.makedirs(a.out, exist_ok=False)
     first_target = min(o for _, o, _, _ in cells) + pd.Timedelta(weeks=1)
-    ask = client.chat.completions.create(model=a.model, temperature=0, messages=[
-        {"role": "user", "content": "What is your training data knowledge cutoff date? Answer with a month and year only."}])
-    log = {"model": a.model, "temperature": cb.TEMPERATURE if a.reasoning_effort is None else None,
-           "reasoning_effort": a.reasoning_effort, "stated_cutoff_operator": a.stated_cutoff,
-           "self_reported_cutoff_verbatim": ask.choices[0].message.content,
-           "run_date": datetime.datetime.now().isoformat(timespec="seconds"), "pub_lag": a.pub_lag,
-           "panel": a.panel, "panel_sha256": hashlib.sha256(open(a.panel, "rb").read()).hexdigest(),
-           "earliest_holdout_target": str(first_target.date()),
-           "out_of_sample": pd.Timestamp(a.stated_cutoff) < first_target,
-           "event_text": NO_EVENTS, "system_prompt": cb.SYSTEM_PROMPT, "n_cells": len(cells)}
-    rows, failures = run_cells(cells, panel, client, cb, a.pub_lag)
+    if os.path.exists(header_path):
+        log = json.load(open(header_path))
+        if (log["model"], log["panel_sha256"], log.get("reasoning_effort"), log["pub_lag"]) != (
+                a.model, panel_sha, a.reasoning_effort, a.pub_lag):
+            raise SystemExit("--resume must use the same --model, --panel, --reasoning-effort and --pub-lag")
+    else:
+        ask = client.chat.completions.create(model=a.model, temperature=0, messages=[
+            {"role": "user", "content": "What is your training data knowledge cutoff date? Answer with a month and year only."}])
+        log = {"model": a.model, "temperature": cb.TEMPERATURE if a.reasoning_effort is None else None,
+               "reasoning_effort": a.reasoning_effort, "stated_cutoff_operator": a.stated_cutoff,
+               "self_reported_cutoff_verbatim": ask.choices[0].message.content,
+               "run_date": datetime.datetime.now().isoformat(timespec="seconds"), "pub_lag": a.pub_lag,
+               "panel": a.panel, "panel_sha256": panel_sha,
+               "earliest_holdout_target": str(first_target.date()),
+               "out_of_sample": pd.Timestamp(a.stated_cutoff) < first_target,
+               "event_text": NO_EVENTS, "system_prompt": cb.SYSTEM_PROMPT, "n_cells": len(cells),
+               "cutoff_question_calls": list(client.calls), "resumes": []}
+        client.calls.clear()
+        json.dump(log, open(header_path, "w"), indent=1, default=str)
+    _, _, _, done, bad = load_progress(progress_path)
+    if a.resume:
+        log["resumes"].append({"at": datetime.datetime.now().isoformat(timespec="seconds"),
+                               "cells_already_done": len(done), "unreadable_progress_lines": bad})
+        json.dump(log, open(header_path, "w"), indent=1, default=str)
+    todo = [c for c in cells if (c[0], str(c[1].date()), c[2]) not in done]
+    run_cells(todo, panel, client, cb, a.pub_lag, progress=progress_path)
+    rows, failures, calls, done, bad = load_progress(progress_path)   # the progress file is the single record
+    client.calls = log.get("cutoff_question_calls", []) + calls
     log["failures"] = failures
     log["n_failures"] = len(failures)
     log["n_transport_failures"] = sum(f["transport"] for f in failures)
@@ -275,10 +388,13 @@ def main():
     log["rerun_pass_done"] = False
     log["response_models_seen"] = sorted({c["response_model"] for c in client.calls if c["response_model"]})
     log["transport_retries"] = sum(1 for c in client.calls if c.get("retried"))
+    log["unreadable_progress_lines"] = bad
+    log["prompt_tokens"] = sum(c.get("prompt_tokens") or 0 for c in client.calls)
+    log["completion_tokens"] = sum(c.get("completion_tokens") or 0 for c in client.calls)
     pd.DataFrame(client.calls).to_csv(os.path.join(a.out, f"cot_calls_{tag}.csv"), index=False)
     pd.DataFrame(rows, columns=["msa", "origin", "horizon", "step", "forecast"]).to_csv(
         os.path.join(a.out, f"cot_forecasts_{tag}.csv"), index=False)
-    json.dump(log, open(os.path.join(a.out, f"cot_run_log_{tag}.json"), "w"), indent=1)
+    json.dump(log, open(os.path.join(a.out, f"cot_run_log_{tag}.json"), "w"), indent=1, default=str)
     print(json.dumps({k: v for k, v in log.items() if k != "failures"}, indent=1), "\nfailures:", len(failures))
 
 

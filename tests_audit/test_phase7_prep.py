@@ -5,6 +5,7 @@ Pre-Phase-7 checks (no network, no API key, no post-cap data).
 2. cot_holdout.ModelCheckedClient: the --model override reaches the API call, response.model is logged,
    and a response from a different model stops the run.
 """
+import json
 import os
 import sys
 import types
@@ -267,3 +268,101 @@ def test_reasoning_effort_replaces_temperature():
     fake = _Recorder()
     ch.ModelCheckedClient(fake, "snap-1").chat.completions.create(model="snap-1", temperature=0.1, messages=[])
     assert fake.kw[0]["temperature"] == 0.1 and "reasoning_effort" not in fake.kw[0]   # default unchanged
+
+
+# ── Real OpenAI SDK path against a simulated server (no network, no key) ──────
+
+def _chat_json(model="gpt-5.6-luna", text="ok <prediction>1,2,3,4</prediction>"):
+    return {"id": "x", "object": "chat.completion", "created": 0, "model": model,
+            "choices": [{"index": 0, "finish_reason": "stop", "message": {"role": "assistant", "content": text}}],
+            "usage": {"prompt_tokens": 700, "completion_tokens": 300, "total_tokens": 1000}}
+
+
+def _sdk_client(handler):
+    import httpx2
+    from openai import OpenAI
+    return OpenAI(api_key="sk-test-not-a-real-key", base_url="https://api.test/v1",
+                  http_client=httpx2.Client(transport=httpx2.MockTransport(handler)))
+
+
+def _server(seen, status=None):
+    """Answers like OpenAI: brotli if the client accepts it, else gzip. `status` forces an error code."""
+    import gzip
+    import brotli
+    import httpx2
+
+    def handler(request):
+        seen.append({"accept": request.headers.get("accept-encoding", ""), "body": json.loads(request.content)})
+        if status:
+            return httpx2.Response(status, json={"error": {"message": "boom"}})
+        raw = json.dumps(_chat_json()).encode()
+        if "br" in seen[-1]["accept"]:
+            return httpx2.Response(200, content=brotli.compress(raw),
+                                   headers={"content-encoding": "br", "content-type": "application/json"})
+        return httpx2.Response(200, content=gzip.compress(raw),
+                               headers={"content-encoding": "gzip", "content-type": "application/json"})
+    return handler
+
+
+def test_negative_control_unhardened_client_reproduces_the_brotli_crash():
+    seen = []
+    c = ch.ModelCheckedClient(_sdk_client(_server(seen)), "gpt-5.6-luna", reasoning_effort="low")
+    with pytest.raises(TypeError, match="keyword"):
+        c.chat.completions.create(model="gpt-5.6-luna", messages=[{"role": "user", "content": "hi"}])
+    assert "br" in seen[0]["accept"]
+
+
+def test_hardened_client_gzip_effort_tokens_and_no_hidden_retries():
+    seen = []
+    c = ch.ModelCheckedClient(ch.harden_client(_sdk_client(_server(seen))), "gpt-5.6-luna", reasoning_effort="low")
+    r = c.chat.completions.create(model="gpt-5.6-luna", temperature=0.1, messages=[{"role": "user", "content": "hi"}])
+    assert r.model == "gpt-5.6-luna" and "<prediction>" in r.choices[0].message.content
+    assert "br" not in seen[0]["accept"] and "gzip" in seen[0]["accept"]
+    assert seen[0]["body"]["reasoning_effort"] == "low" and "temperature" not in seen[0]["body"]
+    assert c.calls[0]["prompt_tokens"] == 700 and c.calls[0]["completion_tokens"] == 300
+    seen = []   # a 503: the SDK must not retry on its own; only the wrapper's 3 logged attempts reach the server
+    c = ch.ModelCheckedClient(ch.harden_client(_sdk_client(_server(seen, status=503))), "gpt-5.6-luna",
+                              reasoning_effort="low", sleep=lambda s: None)
+    with pytest.raises(Exception):
+        c.chat.completions.create(model="gpt-5.6-luna", messages=[])
+    assert len(seen) == 3 and len(c.calls) == 3
+
+
+# ── Checkpoint and resume: a crash mid-run loses nothing already paid for ────
+
+class _CrashAt:
+    """Returns valid 4-step forecasts; raises KeyboardInterrupt (not caught by run_cells) on call number `at`."""
+    def __init__(self, at=None):
+        self.at, self.n, self.model = at, 0, "snap-1"
+        self.chat = types.SimpleNamespace(completions=types.SimpleNamespace(create=self._create))
+
+    def _create(self, **kw):
+        self.n += 1
+        if self.n == self.at:
+            raise KeyboardInterrupt
+        return _Resp("snap-1", "ok <prediction>1,2,3,4</prediction>")
+
+
+def test_checkpoint_then_resume_completes_without_duplicates(tmp_path):
+    import cot_baseline as cb
+    old = cb.MODEL
+    panel = pd.DataFrame({"date": list(pd.date_range("2025-01-04", periods=60, freq="W-SAT")) * 2,
+                          "msa": ["A"] * 60 + ["B"] * 60, "inventory_count": 100.0})
+    d = panel.date.unique()
+    cells = [("A", d[55], 4, d[55]), ("B", d[55], 4, d[55]), ("A", d[54], 4, d[54])]
+    prog = str(tmp_path / "progress.jsonl")
+    try:
+        cb.MODEL = "snap-1"
+        with pytest.raises(KeyboardInterrupt):
+            ch.run_cells(cells, panel, ch.ModelCheckedClient(_CrashAt(at=2), "snap-1"), cb, 0, progress=prog)
+        with open(prog, "a") as f:
+            f.write('{"msa": "B", "orig')                      # a line cut off by the crash
+        _, _, _, done, bad = ch.load_progress(prog)
+        assert len(done) == 1 and bad == 1
+        todo = [c for c in cells if (c[0], str(c[1].date()), c[2]) not in done]
+        ch.run_cells(todo, panel, ch.ModelCheckedClient(_CrashAt(), "snap-1"), cb, 0, progress=prog)
+    finally:
+        cb.MODEL = old
+    rows, fails, calls, done, bad = ch.load_progress(prog)
+    assert len(done) == 3 and len(rows) == 12 and fails == [] and len(calls) == 3
+    assert sorted({(r[0], r[1]) for r in rows}) == sorted({(c[0], str(c[1].date())) for c in cells})

@@ -27,3 +27,16 @@
    - `timesfm_holdout_raw_lag2.csv` d1de51e8aa4412c9f72a9049f07b19b0560d0ab7d3bedba04117c30e4894fb79
    - Holdout grid: 29 / 25 / 20 origins at 4 / 8 / 13 weeks (data to 2026-10-10, one week more than the 28 / 24 / 19 estimated in section 6), 1,110 cells per cut and lag.
 8. STOP for CoT (operator run, smoothed cut, lag 0 and lag 2).
+9. 2026-10-21/22: CoT model changed to gpt-5.6-luna (FINAL_CONFIG 11.4, committed `f124368` before any call).
+10. 2026-10-22 00:29, first CoT attempt (operator): stopped on the first call (cutoff question) with `TypeError: process() takes no keyword arguments` in httpx2's brotli decoder (installed brotli 1.0.9 too old). No forecast call was made. Folder `audit_reports/phase7/cot_20261022_0029_lag0` is empty (kept); console log `cot_logs/cot_20261022_0029_lag0.txt` (checked: no key in it).
+11. Fixes (FINAL_CONFIG 11.4 items 5-6), all offline, no API call by the audit:
+    - gzip-only transport, SDK retries off (they had silently exceeded the 3-attempt rule), 180 s timeout;
+    - preflight, per-cell checkpoint, resume;
+    - `run_cot.ps1` rewritten (preflight first, `-Stamp` to continue).
+
+    Tests: 18 pass in `test_phase7_prep.py`, including:
+    - a negative control that reproduces the brotli crash through the real SDK;
+    - a simulated-server test of headers, body and retries;
+    - a crash-and-resume test.
+
+    The resume test found a bug (a cut-off last line swallowed the next record), fixed before commit. A full `run_cot.ps1` run against a simulated server (kill at request 600, then `-Stamp` resume) gave 1,110 / 1,110 cells per lag, no duplicate calls, and output keys identical to the TimesFM files. That run also found a bug in the ps1 exit-code handling, fixed. Freeze check OK.

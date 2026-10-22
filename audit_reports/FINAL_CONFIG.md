@@ -157,3 +157,15 @@ Replaces the model named in section 11 item 5. Umang asked the audit to choose a
 2. **Parameters:** `gpt-5.6-luna` is a reasoning model. Its documentation lists `reasoning_effort` but not `temperature`. The run uses `--reasoning-effort low` and sends no temperature: `cot_holdout.py` drops the `temperature=0.1` that `cot_baseline.py` passes (FINAL_CONFIG 11 had no temperature rule for reasoning models). Prompt, parsing and the single correction are unchanged. The NEXUS system prompt still says "Your knowledge cutoff date is January 2025" (disclosed, D2b).
 3. **`--model` and `response.model`:** `--model` is `gpt-5.6-luna`. If the API reports a different (dated) name, the run stops by design. It is then re-run with exactly that name and a new `--out` directory, and the stopped attempt is reported.
 4. **Comparability:** the paper's fold-1 CoT used gpt-4o-mini, so the holdout CoT is a different model. The paper says so. No other model is run.
+5. **Transport fixes after the first attempt (2026-10-22, before any forecast call).** The first attempt (`cot_20261022_0029_lag0`, empty folder; log `cot_logs/cot_20261022_0029_lag0.txt`) stopped on its first call, the cutoff question, with `TypeError: process() takes no keyword arguments`. Cause: httpx2 requests brotli, and the installed brotli 1.0.9 cannot decode it. A second issue was found while fixing it: the OpenAI SDK retried silently (max_retries = 2) on top of the logged wrapper, against item D's "at most 3 attempts". Fixes in `cot_holdout.harden_client` (no environment change):
+   - Accept-Encoding gzip/deflate only;
+   - SDK `max_retries=0`;
+   - 180 s request timeout (a timeout is a transport error).
+
+   Prompt, parsing and the forecast path are unchanged.
+6. **Run safety.**
+   - `--preflight`: 2 real calls on pre-cap data (Phoenix 2025-06-07). No result file is written.
+   - Every finished cell is appended and fsynced to `cot_progress_lag{L}.jsonl`. The final CSVs are built from that file.
+   - `--resume` continues an interrupted run in the same folder without calling finished cells again. A cell in flight at a crash is redone. Resumes are logged.
+   - These are not re-runs in the sense of item I: no finished cell, and no failure, is called twice.
+   - Tested offline against a simulated OpenAI server, including a forced mid-run kill and a resume (`tests_audit/test_phase7_prep.py`; full `run_cot.ps1` path checked by hand).
