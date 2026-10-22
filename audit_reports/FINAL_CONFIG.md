@@ -169,3 +169,11 @@ Replaces the model named in section 11 item 5. Umang asked the audit to choose a
    - `--resume` continues an interrupted run in the same folder without calling finished cells again. A cell in flight at a crash is redone. Resumes are logged.
    - These are not re-runs in the sense of item I: no finished cell, and no failure, is called twice.
    - Tested offline against a simulated OpenAI server, including a forced mid-run kill and a resume (`tests_audit/test_phase7_prep.py`; full `run_cot.ps1` path checked by hand).
+
+### 11.5 Smoothed lag-2 statistics after a runner bug (Umang, 2026-10-22; POST HOC, recorded before any lag-2 smoothed number was viewed)
+
+The frozen runner failed in `holdout_stats` for smoothed lag 2. Cause: the 27 cells without a CoT forecast leave weeks with fewer than 15 MSAs, and `stats_lib.weekly` asserts 15 per week. The runner is not modified. `audit_reports/phase7/posthoc_lag2_stats.py` applies the runner's own `holdout_stats` to that run's `cell_losses.csv`, mirroring section 11 item 5:
+1. **Without CoT:** all cells, the pre-registered methods minus CoT.
+2. **With CoT:** only the (h, origin) weeks in which all 15 MSAs have a CoT forecast, for every method.
+
+Both are labelled post hoc. The same bug would affect any run with an incomplete external forecast. It did not affect smoothed lag 0, which has no missing CoT cells, or the raw runs, which have no CoT.
