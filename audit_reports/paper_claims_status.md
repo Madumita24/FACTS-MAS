@@ -50,3 +50,17 @@ Last updated: Phase 6, 2026-10-16. FA-ETS-d = factor-adjusted damped ETS (window
 | C25 | "All weights and constants are chosen without access to test outcomes" (l.519) | **withdrawn (as stated)** | Same evidence as C8 (seasonal window, adaptive vs granular, global calibration). | P3 |
 | C26 | Size of the gain over naive (abstract, Table 5) | **weakened** | The target is Zillow's smoothed series. On the raw series R1c's 4-week reduction vs naive falls from 49% to 24% (13 weeks: 35% to 33%). Zillow's 2020 methodology notes confirm the target is a four-week trailing average. Raw-cut tests (Phase 5): P beats naive at every horizon (p <= 0.0001); at 4 weeks P is no better than the seasonal channel alone (p = 0.83) and is worse than FA-ETS-d (p = 0.003). | P3, P5 |
 | C27 | "At each forecast origin ... models are trained only on observations available through that week" (abstract / Sec. 1, l.63-64) | **weakened** | Zillow posts each week's data 7-13 days after the week ends (file last date vs download date; 2020 releases were 6 days). The backtest treats inventory at t as known at t, so every method, including naive, is optimistic by 1-2 weeks. Only the P5a flow channel used a 2-week availability lag. Not changed; must be disclosed. | P5 |
+
+## Phase 7 holdout update (2026-10-22)
+
+Holdout: origins 2026-02-28..2026-09-12, frozen P, smoothed cut lag 0 primary; 13 weeks descriptive. Full numbers in `phase7_20261022.md`.
+
+| # | Update |
+|---|---|
+| C1 | Replace the headline with backtest and holdout numbers. Holdout P 1.243 / 1.929 / 3.045 vs naive 3.122 / 5.445 / 8.438; FA-ETS-d 1.138 / 1.936 / 3.080. Raw cut: P 2.053 / 2.671 / 3.644 vs naive 3.355 / 5.306 / 7.925. |
+| C2 | **Holds out-of-sample** (H7.1): P vs naive −1.88 [−3.03, −0.90], −3.52 [−5.68, −1.70]; 13wk −5.39 (descriptive). Also on the raw cut and with a 2-week lag. |
+| C19 | **Superseded.** Holdout CoT (gpt-5.6-luna, documented cutoff 2026-02-16, out-of-sample) 1.259 / 2.225 / 3.268. Not significantly different from FA-ETS-d (p = 0.38 / 0.43 / 0.60). P's MAPE is lower at every horizon (descriptive; not a pre-registered test). |
+| C23 | **Withdrawn, confirmed out-of-sample.** H7.3: P ≈ FA-ETS-d at 8wk (90% CI [−0.029, 0.014], margin ±0.039). H7.4: FA-ETS-d better at 4wk (+0.105, p = 0.044). Raw cut 8wk: P better by 0.038 (p = 0.031, secondary); Naive2 is equally good there, so it is not evidence for fusion. |
+| C26 | **Weakened, confirmed.** Holdout 4-week reduction vs naive: 60% smoothed vs 39% raw. |
+| C27 | **Quantified.** With a 2-week publication lag every method's error rises (smoothed P 4wk 1.243 to 2.270; naive 3.122 to 5.474); conclusions unchanged. |
+| C18 | Holds: TimesFM beats naive on the holdout, but is significantly worse than FA-ETS-d at 4 and 8 weeks (p = 0.016, < 0.0001). |

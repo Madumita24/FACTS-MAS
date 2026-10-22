@@ -89,3 +89,12 @@ Numbers are TEST, CLEANBLEED, smoothed cut, unless stated.
 | E4 (listing-flow channel) | **Included** in the paper as a tested null. |
 | C17 in the claims file (temporal-seasonal handoff) | **Withdrawn**: it replicates in neither domain (housing: only with a non-seasonal temporal channel; UI: absent). |
 | B15 (numerical tolerance) | Added as a methods note (gate v2 accepted). |
+
+## H. Phase 7 additions (2026-10-22)
+
+| # | Location | Required change |
+|---|---|---|
+| H1 | Results (new subsection) | Add the holdout: protocol (frozen configuration, one fold, origins from 2026-02-28, pre-registered H7.1-H7.4), table of MAPE for both cuts and lag 0/2 (`results_tables/phase7_holdout_mape.csv`), hypothesis verdicts with CIs; 13 weeks marked descriptive. |
+| H2 | Table 6 and CoT text | Replace with TimesFM (six folds + holdout) and CoT (holdout only): gpt-5.6-luna, reasoning effort low, no temperature, NEXUS prompt (which states "January 2025"), documented cutoff 2026-02-16, self-reported "June 2024"; 27 of 1,110 lag-2 cells missing after a network drop (2.4%). |
+| H3 | Methods (statistics) | State that the smoothed lag-2 statistics were computed post hoc after a runner bug (incomplete weeks), with and without CoT (FINAL_CONFIG 11.5). |
+| H4 | Discussion | The holdout period was easier for every method; compare methods within a period, not absolute MAPE across periods. |
