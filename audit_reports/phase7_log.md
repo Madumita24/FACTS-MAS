@@ -40,3 +40,11 @@
     - a crash-and-resume test.
 
     The resume test found a bug (a cut-off last line swallowed the next record), fixed before commit. A full `run_cot.ps1` run against a simulated server (kill at request 600, then `-Stamp` resume) gave 1,110 / 1,110 cells per lag, no duplicate calls, and output keys identical to the TimesFM files. That run also found a bug in the ps1 exit-code handling, fixed. Freeze check OK.
+12. CoT run (operator, `run_cot.ps1`, stamp `20261022_0043`), gpt-5.6-luna, reasoning effort low. Preflight OK.
+    - Lag 0: 2026-10-22 00:43-02:06. 1,110 / 1,110 cells, 0 failures, 0 retries.
+    - Lag 2: started 02:06. Stopped by the operator at 331 cells (overnight), resumed 11:11:54 (logged), finished.
+      - 27 failures (2.43%), all `APIConnectionError` within 11:28:12-11:30:21, a network drop. Each was tried 3 times (83 failed attempts in all; 56 retries).
+      - Below the 5% threshold, so no re-run pass is allowed (11.2 I) and with/without-CoT statistics are not required (11 item 5).
+      - The runner drops these 27 lag-2 smoothed cells for every method in that run's paired statistics.
+    - response.model always `gpt-5.6-luna`. Stated cutoff 2026-02-16 (out_of_sample = true); self-reported cutoff "June 2024" (recorded, not used).
+    - Tokens 2,070,830 in / 691,657 out, about $1.24 at list price. No key string in any output.

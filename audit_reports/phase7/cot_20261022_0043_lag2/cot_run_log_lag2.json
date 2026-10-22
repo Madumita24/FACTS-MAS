@@ -1,0 +1,243 @@
+{
+ "model": "gpt-5.6-luna",
+ "temperature": null,
+ "reasoning_effort": "low",
+ "stated_cutoff_operator": "2026-02-16",
+ "self_reported_cutoff_verbatim": "June 2024",
+ "run_date": "2026-10-22T02:06:41",
+ "pub_lag": 2,
+ "panel": "..\\facts_mas_phase7_archive\\archive_20261020b\\panel_smoothed.csv",
+ "panel_sha256": "282e9d3215e85555f96deb781ac5aa8668fdb3e7e7cd79e378d5ee00ba355f1d",
+ "earliest_holdout_target": "2026-03-07",
+ "out_of_sample": true,
+ "event_text": "No significant events recorded.",
+ "system_prompt": "You are a contextual numerical forecasting agent. Your task is to predict future values based on the provided historical context. You have to solely rely on your own deductive reasoning based on the provided context. Your knowledge cutoff date is January 2025.",
+ "n_cells": 1110,
+ "cutoff_question_calls": [
+  {
+   "requested_model": "gpt-5.6-luna",
+   "response_model": "gpt-5.6-luna",
+   "at": "2026-10-22T02:06:39",
+   "attempt": 1,
+   "error": null,
+   "status_code": null,
+   "retried": false,
+   "retry_after_s": null,
+   "wait_s": null,
+   "note": null,
+   "prompt_tokens": 23,
+   "completion_tokens": 7
+  }
+ ],
+ "resumes": [
+  {
+   "at": "2026-10-22T11:11:54",
+   "cells_already_done": 331,
+   "unreadable_progress_lines": 0
+  }
+ ],
+ "failures": [
+  {
+   "msa": "Miami",
+   "origin": "2026-04-11",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-04-18",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-04-18",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-04-18",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-04-25",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-04-25",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-04-25",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-02",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-02",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-02",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-09",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-09",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-09",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-16",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-16",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-16",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-23",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-23",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-23",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-30",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-30",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-05-30",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-06-06",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-06-06",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-06-06",
+   "h": 13,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-06-13",
+   "h": 4,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  },
+  {
+   "msa": "Miami",
+   "origin": "2026-06-13",
+   "h": 8,
+   "error": "APIConnectionError: Connection error.",
+   "transport": true
+  }
+ ],
+ "n_failures": 27,
+ "n_transport_failures": 27,
+ "failure_share": 0.024324324324324326,
+ "report_with_and_without_cot": false,
+ "rerun_allowed": false,
+ "rerun_pass_done": false,
+ "response_models_seen": [
+  "gpt-5.6-luna"
+ ],
+ "transport_retries": 56,
+ "unreadable_progress_lines": 0,
+ "prompt_tokens": 1022671,
+ "completion_tokens": 359437
+}
