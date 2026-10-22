@@ -245,3 +245,25 @@ def test_retry_after_over_cap_is_not_waited_and_counts_as_transport_failure():
     finally:
         cb.MODEL = old
     assert rows == [] and len(fails) == 1 and fails[0]["transport"] is True and slept == []
+
+
+# ── FINAL_CONFIG 11.4: reasoning models get reasoning_effort, never temperature ─
+
+class _Recorder:
+    def __init__(self, model="snap-1"):
+        self.model, self.kw = model, []
+        self.chat = types.SimpleNamespace(completions=types.SimpleNamespace(create=self._create))
+
+    def _create(self, **kw):
+        self.kw.append(kw)
+        return _Resp(self.model, "ok <prediction>1,2,3,4</prediction>")
+
+
+def test_reasoning_effort_replaces_temperature():
+    fake = _Recorder()
+    ch.ModelCheckedClient(fake, "snap-1", reasoning_effort="low").chat.completions.create(
+        model="snap-1", temperature=0.1, messages=[])
+    assert "temperature" not in fake.kw[0] and fake.kw[0]["reasoning_effort"] == "low"
+    fake = _Recorder()
+    ch.ModelCheckedClient(fake, "snap-1").chat.completions.create(model="snap-1", temperature=0.1, messages=[])
+    assert fake.kw[0]["temperature"] == 0.1 and "reasoning_effort" not in fake.kw[0]   # default unchanged

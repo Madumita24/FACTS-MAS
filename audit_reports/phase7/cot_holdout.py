@@ -65,10 +65,13 @@ class ModelCheckedClient:
     BASE_DELAY_S = 1.0
     RETRY_AFTER_CAP_S = 60.0   # longer requests are not waited for: the cell fails as a transport failure
 
-    def __init__(self, client, expected, sleep=None):
+    def __init__(self, client, expected, sleep=None, reasoning_effort=None):
         import time
         import types
         self._client, self.expected, self.calls = client, expected, []
+        # FINAL_CONFIG 11.4: for reasoning models, send the documented reasoning_effort and omit temperature.
+        # None keeps the original behaviour (temperature passed through unchanged).
+        self.reasoning_effort = reasoning_effort
         self._sleep = sleep or time.sleep
         self.chat = types.SimpleNamespace(completions=types.SimpleNamespace(create=self._create))
 
@@ -100,6 +103,9 @@ class ModelCheckedClient:
     def _create(self, **kw):
         if kw.get("model") != self.expected:
             raise ModelMismatch(f"requested model {kw.get('model')!r} != --model {self.expected!r}")
+        if self.reasoning_effort is not None:
+            kw = {k: v for k, v in kw.items() if k != "temperature"}
+            kw["reasoning_effort"] = self.reasoning_effort
         for attempt in range(1, self.MAX_ATTEMPTS + 1):
             at = datetime.datetime.now().isoformat(timespec="seconds")
             try:
@@ -162,8 +168,11 @@ def dry_run():
 def run_cells(cells, panel, client, cb, lag):
     """Forecast every (msa, origin, h, info_origin) cell. Returns (rows, failures); each failure records whether
     it was a transport error (eligible for the single re-run pass) or a parse / other failure (never re-run)."""
+    import sys
+    import time
     rows, failures = [], []
-    for msa, o, h, oi in cells:
+    t0, n = time.time(), len(cells)
+    for i, (msa, o, h, oi) in enumerate(cells, start=1):
         s = panel[panel.msa == msa].sort_values("date").set_index("date")["inventory_count"]
         s = s[s.index <= oi]
         try:
@@ -175,6 +184,10 @@ def run_cells(cells, panel, client, cb, lag):
         except Exception as e:  # recorded, never filled with a fallback
             failures.append({"msa": msa, "origin": str(o.date()), "h": h, "error": f"{type(e).__name__}: {e}",
                              "transport": bool(ModelCheckedClient.is_transport_error(e))})
+        el = time.time() - t0
+        eta = el / i * (n - i)
+        print(f"[{i}/{n}] {msa} {o.date()} h={h} failures={len(failures)} "
+              f"elapsed={el / 60:.1f}m eta={eta / 60:.1f}m", file=sys.stderr, flush=True)
     return rows, failures
 
 
@@ -195,6 +208,8 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--pub-lag", type=int, choices=[0, 2], default=0)
     ap.add_argument("--dry-run-prompts", action="store_true")
+    ap.add_argument("--reasoning-effort", choices=["none", "low", "medium", "high"], default=None,
+                    help="reasoning models only (FINAL_CONFIG 11.4): sent as reasoning_effort; temperature is omitted")
     ap.add_argument("--rerun-transport-failures", action="store_true",
                     help="the single permitted re-run pass over transport-failed cells of an existing --out run")
     a = ap.parse_args()
@@ -218,7 +233,9 @@ def main():
         if not todo:
             raise SystemExit(f"no re-run allowed: failure share {log['failure_share']:.3%} (rule: > 5%) "
                              f"or no transport failures")
-        client = ModelCheckedClient(cb._client(), a.model)
+        if log.get("reasoning_effort") != a.reasoning_effort:
+            raise SystemExit("re-run must use the same --reasoning-effort as the original run")
+        client = ModelCheckedClient(cb._client(), a.model, reasoning_effort=a.reasoning_effort)
         rows, still = run_cells(todo, panel, client, cb, a.pub_lag)
         prev = pd.read_csv(os.path.join(a.out, f"cot_forecasts_{tag}.csv"))
         merged = pd.concat([prev, pd.DataFrame(rows, columns=prev.columns)], ignore_index=True)
@@ -235,12 +252,13 @@ def main():
         print(json.dumps({"cells_rerun": len(todo), "recovered": len(fixed),
                           "failure_share_after_rerun": log["failure_share_after_rerun"]}, indent=1))
         return
-    client = ModelCheckedClient(cb._client(), a.model)  # key read from the operator's environment
+    client = ModelCheckedClient(cb._client(), a.model, reasoning_effort=a.reasoning_effort)  # key read from the operator's environment
     os.makedirs(a.out, exist_ok=False)
     first_target = min(o for _, o, _, _ in cells) + pd.Timedelta(weeks=1)
     ask = client.chat.completions.create(model=a.model, temperature=0, messages=[
         {"role": "user", "content": "What is your training data knowledge cutoff date? Answer with a month and year only."}])
-    log = {"model": a.model, "temperature": cb.TEMPERATURE, "stated_cutoff_operator": a.stated_cutoff,
+    log = {"model": a.model, "temperature": cb.TEMPERATURE if a.reasoning_effort is None else None,
+           "reasoning_effort": a.reasoning_effort, "stated_cutoff_operator": a.stated_cutoff,
            "self_reported_cutoff_verbatim": ask.choices[0].message.content,
            "run_date": datetime.datetime.now().isoformat(timespec="seconds"), "pub_lag": a.pub_lag,
            "panel": a.panel, "panel_sha256": hashlib.sha256(open(a.panel, "rb").read()).hexdigest(),

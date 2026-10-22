@@ -146,3 +146,14 @@ I. **CoT re-run pass.** If the CoT failure share is above 5%, exactly one logged
 ### 11.3 Phase 7 authorisation
 
 Authorisation: Umang Bid, 2026-10-20; co-author sign-off waived by the operator.
+
+### 11.4 CoT model change (Umang, 2026-10-21; committed before any CoT API call)
+
+Replaces the model named in section 11 item 5. Umang asked the audit to choose a current, low-cost model; the choice was made from OpenAI's public documentation only (no API call):
+- `gpt-4o-mini-2024-07-18` is deprecated (shutdown 2027-01-14).
+- The GPT-6 family (`gpt-6-luna`, `gpt-6.1-sol`, `gpt-6-astra`) is excluded: documented knowledge cutoffs (2026-04-30 to 2026-05-18) fall inside the holdout (first target 2026-03-07), so the results could not count as out-of-sample.
+
+1. **Model:** `gpt-5.6-luna` (OpenAI docs: knowledge cutoff "Feb 16, 2026"; $0.20 / $1.20 per million input / output tokens; Chat Completions supported). `--stated-cutoff 2026-02-16`, which is before the earliest holdout target, so the run is out-of-sample under section 6.
+2. **Parameters:** `gpt-5.6-luna` is a reasoning model. Its documentation lists `reasoning_effort` but not `temperature`. The run uses `--reasoning-effort low` and sends no temperature: `cot_holdout.py` drops the `temperature=0.1` that `cot_baseline.py` passes (FINAL_CONFIG 11 had no temperature rule for reasoning models). Prompt, parsing and the single correction are unchanged. The NEXUS system prompt still says "Your knowledge cutoff date is January 2025" (disclosed, D2b).
+3. **`--model` and `response.model`:** `--model` is `gpt-5.6-luna`. If the API reports a different (dated) name, the run stops by design. It is then re-run with exactly that name and a new `--out` directory, and the stopped attempt is reported.
+4. **Comparability:** the paper's fold-1 CoT used gpt-4o-mini, so the holdout CoT is a different model. The paper says so. No other model is run.
