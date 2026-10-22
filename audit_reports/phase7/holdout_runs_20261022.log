@@ -1,0 +1,30 @@
+== smoothed lag0 start 12:16:04
+freeze check OK: 17 files match FINAL_CONFIG.md section 9
+written C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase7\results_20261022_smoothed_lag0
+== smoothed lag0 exit=0 end 12:19:26
+== smoothed lag2 start 12:19:26
+freeze check OK: 17 files match FINAL_CONFIG.md section 9
+Traceback (most recent call last):
+  File "C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase7\run_holdout.py", line 322, in <module>
+    main()
+  File "C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase7\run_holdout.py", line 318, in main
+    (gate if a.gate else dry_run if a.dry_run else holdout)(a)
+  File "C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase7\run_holdout.py", line 298, in holdout
+    holdout_stats(D, methods, f"HOLDOUT cut={args.cut} lag={args.pub_lag}").to_csv(os.path.join(outdir, "stats.csv"), index=False)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase7\run_holdout.py", line 187, in holdout_stats
+    W = sl.weekly(sub, methods)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase4_scripts\stats_lib.py", line 55, in weekly
+    assert (sub.groupby("origin").size() == 15).all()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+== smoothed lag2 exit=1 end 12:22:14
+== raw lag0 start 12:23:23
+freeze check OK: 17 files match FINAL_CONFIG.md section 9
+written C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase7\results_20261022_raw_lag0
+== raw lag0 exit=0 end 12:26:44
+== raw lag2 start 12:26:44
+freeze check OK: 17 files match FINAL_CONFIG.md section 9
+written C:\Users\umang\OneDrive\Desktop\Clg Materials\Rong Pan Research\FACTS-MAS\audit_reports\phase7\results_20261022_raw_lag2
+== raw lag2 exit=0 end 12:29:43

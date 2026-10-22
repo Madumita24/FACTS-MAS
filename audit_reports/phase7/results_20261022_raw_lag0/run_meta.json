@@ -1,0 +1,29 @@
+{
+ "choice": {
+  "7": "fa_ets_d"
+ },
+ "modes": {
+  "modes": {
+   "7": [
+    {
+     "4": "fold",
+     "8": "fold",
+     "13": "regime"
+    },
+    {
+     "4": "regime",
+     "8": "regime",
+     "13": "regime"
+    },
+    {
+     "4": "fold",
+     "8": "regime",
+     "13": "regime"
+    }
+   ]
+  }
+ },
+ "runner_sha256": "06dee8fd40831734adbdc706a75ed160494c07a2d236ee3694d612485c519dce",
+ "panel": "../facts_mas_phase7_archive/archive_20261020b/panel_raw.csv",
+ "panel_sha256": "bb7b73b843bc48450e58a5a8314a809de4e54329120f3cae8c7d5f3c5941d454"
+}

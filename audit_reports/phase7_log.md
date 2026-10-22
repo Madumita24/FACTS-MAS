@@ -48,3 +48,13 @@
       - The runner drops these 27 lag-2 smoothed cells for every method in that run's paired statistics.
     - response.model always `gpt-5.6-luna`. Stated cutoff 2026-02-16 (out_of_sample = true); self-reported cutoff "June 2024" (recorded, not used).
     - Tokens 2,070,830 in / 691,657 out, about $1.24 at list price. No key string in any output.
+13. Holdout scoring with the frozen runner (`run_holdout.py --holdout --phase7-go`; freeze check OK at every start; runner sha256 06dee8fd...). Log: `audit_reports/phase7/holdout_runs_20261022.log`.
+    - smoothed lag 0: 12:16-12:19, exit 0.
+    - smoothed lag 2: 12:19-12:22, **exit 1 (runner bug)**.
+      - `holdout_stats` drops cells with any missing method and then calls `stats_lib.weekly`, which asserts 15 MSAs in every week. The 27 lag-2 cells without a CoT forecast leave incomplete weeks, so the assertion fails.
+      - `cell_losses.csv` was written; `stats.csv` and `run_meta.json` were not.
+      - Not patched (frozen runner). Lag-2 smoothed statistics are pending the operator's decision; no lag-2 smoothed number has been looked at.
+      - The runner cannot be re-run for this cut and lag today (`exist_ok=False`, known limitation).
+    - raw lag 0: 12:23-12:26, exit 0.
+    - raw lag 2: 12:26-12:29, exit 0.
+    - Filled-target check: 0 flagged cells in smoothed lag 0, raw lag 0 and raw lag 2 (no post-cap filled rows exist). Smoothed lag 2 cannot run the script's cut check, because the run wrote no `run_meta.json`.
