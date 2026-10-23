@@ -125,9 +125,10 @@ horizon, from 7.225\% to 3.622\% at 8 weeks, and from 10.814\% to 5.731\% at
 8.438\% to 3.045\% on the holdout. The reduction is smaller on the unsmoothed
 series (24\% at 4 weeks in the backtest, against 50\% on the smoothed series).
 The fused forecast is significantly more accurate than the TimesFM foundation
-model \citep{das2024timesfm} in the backtest, and on the holdout it is more
-accurate than both TimesFM and a chain-of-thought language-model forecast
-built on the NEXUS prompt \citep{das2026nexus}. It is not more accurate than a
+model \citep{das2024timesfm} in the backtest. On the holdout it has a lower
+error than a chain-of-thought language-model forecast built on the NEXUS
+prompt \citep{das2026nexus}, but the difference is not statistically
+significant. It is not more accurate than a
 factor-adjusted damped exponential smoothing model, with which it is
 statistically equivalent at 8 weeks. We also transfer the method to weekly
 unemployment insurance claims to assess the generalizability of the approach.
@@ -1121,8 +1122,11 @@ supported. FACTS-MAS reduces MAPE relative to the naive forecast by 60\%,
 65\%, and 64\% on the smoothed series and by 39\%, 50\%, and 54\% on the
 unsmoothed series. It is equivalent to FA-ETS-d at 8 weeks and less accurate
 than FA-ETS-d at 4 weeks by 0.105 percentage points. The chain-of-thought
-forecast is competitive but less accurate than FA-ETS-d at every horizon,
-although not significantly so ($p=0.38$, $0.43$, and $0.60$); TimesFM is
+forecast is competitive: its MAPE is higher than that of FA-ETS-d and of
+FACTS-MAS at every horizon, but neither difference is statistically
+significant (against FA-ETS-d, $p=0.38$, $0.43$, and $0.60$; against
+FACTS-MAS, in a comparison added after the results were seen, $p=0.90$,
+$0.43$, and $0.54$). TimesFM is
 significantly less accurate than FA-ETS-d at 4 and 8 weeks ($p=0.016$ and
 $p<10^{-4}$). On the unsmoothed series FACTS-MAS at 4 weeks coincides with the
 seasonally adjusted naive forecast, and at 8 weeks it is slightly more
@@ -1467,8 +1471,9 @@ pairs per horizon in the backtest and 29 weekly origins per MSA in the holdout.
 ```latex
 FACTS-MAS improves on persistence at every evaluated horizon, on both Zillow
 series, in the backtest and on the holdout, and it is more accurate than the
-TimesFM foundation model and, on the holdout, than a chain-of-thought
-language-model forecast. It is not more accurate than the strongest single
+TimesFM foundation model. On the holdout a chain-of-thought language-model
+forecast comes close to it, with no statistically significant difference.
+It is not more accurate than the strongest single
 model, factor-adjusted damped exponential smoothing, which it matches at 8
 weeks. The more important architectural point is that the final forecast is
 the product of tests that each channel had to pass. Temporal dynamics and
@@ -1535,8 +1540,9 @@ configuration attains backtest MAPE of 2.118\%, 3.622\%, and 5.731\% at 4,
 10.814\% for last-value persistence, and 1.243\%, 1.929\%, and 3.045\% on a
 pre-registered holdout, against 3.122\%, 5.445\%, and 8.438\%. The gains are
 smaller but still significant on the unsmoothed series. FACTS-MAS is more
-accurate than the TimesFM~2.5 foundation model and, on the holdout, than a
-chain-of-thought language-model forecast, but it is not more accurate than a
+accurate than the TimesFM~2.5 foundation model; on the holdout its error is
+lower than that of a chain-of-thought language-model forecast built on the
+NEXUS prompt, but not significantly so. It is not more accurate than a
 factor-adjusted damped exponential smoothing model, with which it is
 equivalent at 8 weeks. Those results coexist with null and rejected channels:
 the tested macro magnitude specification adds little short-horizon skill,

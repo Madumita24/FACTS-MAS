@@ -64,3 +64,5 @@ Holdout: origins 2026-02-28..2026-09-12, frozen P, smoothed cut lag 0 primary; 1
 | C26 | **Weakened, confirmed.** Holdout 4-week reduction vs naive: 60% smoothed vs 39% raw. |
 | C27 | **Quantified.** With a 2-week publication lag every method's error rises (smoothed P 4wk 1.243 to 2.270; naive 3.122 to 5.474); conclusions unchanged. |
 | C18 | Holds: TimesFM beats naive on the holdout, but is significantly worse than FA-ETS-d at 4 and 8 weeks (p = 0.016, < 0.0001). |
+
+**C19 post-hoc addition (2026-10-22, not pre-registered, requested after the holdout MAPEs were seen):** P vs CoT on the holdout (smoothed, lag 0): −0.016 / −0.296 / −0.223, 95% CI [−0.203, 0.194] / [−0.862, 0.196] / [−0.711, 0.314], DM p = 0.90 / 0.43 / 0.54. **Not significant at any horizon.** P is lower in 8 / 10 / 7 of 15 MSAs. Lag 2 (complete weeks only): also not significant (p ≥ 0.65). The paper says "lower error, not significantly different", never "more accurate than CoT". The comparison is with a NEXUS-*prompt* CoT baseline; the NEXUS multi-agent system itself was never run. Table: `results_tables/phase7_posthoc_p_vs_cot.csv`.
