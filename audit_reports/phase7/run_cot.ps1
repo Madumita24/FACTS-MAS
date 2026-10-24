@@ -63,7 +63,7 @@ if (-not $Resuming) {
     if ($code -ne 0) {
         $tail = (Get-Content $log -Tail 3) -join "`n"
         Done "STOPPED at preflight (exit $code)" ("Nothing else was called (cost well under 1 cent).`nLast lines:`n$tail" +
-            (MismatchHint $log) + "`n`nTell Claude what this says.")
+            (MismatchHint $log) + "`n`nReport what this says.")
         exit $code
     }
 }
@@ -105,4 +105,4 @@ foreach ($lag in 0, 2) {
 }
 $cost = [math]::Round(($tokIn * 0.20 + $tokOut * 1.20) / 1e6, 2)
 Done "FINISHED" (($summary -join "`n") + "`n`nTokens: $tokIn in, $tokOut out (about `$$cost at list price)." +
-    "`nOutput folders: $OutRoot\cot_${Stamp}_lag0 and _lag2. Tell Claude 'CoT done'.")
+    "`nOutput folders: $OutRoot\cot_${Stamp}_lag0 and _lag2. Report 'CoT done'.")
