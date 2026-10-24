@@ -1653,3 +1653,11 @@ the same.
 | `recomputed when a new origin` | weights are per fold |
 
 Then compile. Check that there are no undefined references (`??`) and no duplicate labels (see the note in Step 56).
+
+## Corrections found when checking the draft (2026-10-23)
+
+| # | Where | Search for | Fix |
+|---|---|---|---|
+| C1 | Sec. 3.4, after the softmax equation | `\caption{FACTS-MAS at one forecast origin.` (the second occurrence, outside the figure) | Delete the four caption lines and paste the Step 14 text (`In the housing configuration $\tau=0.05$ ...`). A `\caption` outside a figure does not compile. |
+| C2 | Sec. 4 opening | `claims are analyzed by FACTS-MAS` | Change to `claims---are analyzed by FACTS-MAS` (closing dash missing). |
+| C3 | Sec. 4.1, ablation paragraph | `Domain-specific constants such as lags, event-impact scales, and durations` | Change to `Domain-specific constants such as event-impact scales, event durations, and reversion caps` (the lags are not calibrated). |
