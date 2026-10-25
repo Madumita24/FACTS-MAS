@@ -375,6 +375,7 @@ Code: [`domains/ui_claims/`](domains/ui_claims/). Protocol: [`audit_reports/ui_p
 ```
 FACTS-MAS/
 ├── README.md                      this file
+├── LICENSE                        MIT license
 ├── requirements.txt               pinned environment (Python 3.11)
 ├── pull_macro.py, pull_zillow.py, align_data.py, pull_intrinsic.py, fetch_fema_events.py
 │                                  data acquisition and alignment
@@ -554,4 +555,4 @@ A preprint is in preparation. Until it is posted, please cite the repository:
 
 Contact: Madumita Karthikeyan (mkarthi5@asu.edu), Umang Rajnikant Bid (umangraj@asu.edu), Rong Pan (rong.pan@asu.edu).
 
-License: not yet specified. Please contact the authors before reusing the code or data.
+License: MIT (see [`LICENSE`](LICENSE)). Third-party data (Zillow, FRED, OpenFEMA, Census, NOAA) remain subject to their providers' terms.
