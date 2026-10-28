@@ -4,6 +4,8 @@
 
 Madumita Karthikeyan, Umang Rajnikant Bid, Rong Pan. Arizona State University.
 
+📄 **Paper:** [FACTS-MAS: A Multi-Agent Architecture for Adaptive Forecasting from Heterogeneous Evidence (PDF)](paper/FACTS_MAS.pdf)
+
 FACTS-MAS is a forecasting framework that splits the evidence behind a forecast into separate channels, such as recent dynamics, seasonality, economic conditions, structural attributes and discrete events. Each channel produces its own numerical forecast, and each one has to prove it beats a simple reference on historical data before it is allowed to influence the final forecast. Channels that do not help are down-weighted, and calibration is allowed to set an unsupported effect to zero.
 
 The main case study forecasts weekly for-sale housing inventory for 15 U.S. metropolitan areas at 4, 8 and 13 weeks ahead. The method is also transferred to weekly unemployment insurance claims.
