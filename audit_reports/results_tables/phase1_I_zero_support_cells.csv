@@ -1,0 +1,6 @@
+# CONFIG: commit=ef28f47 | split=TEST | folds=1-6 | msas=15 | horizons=4,8,13 | zillow=smoothed | fusion=adaptive T=0.05 104wk | rho_max=0.3 | label=PROVISIONAL DISCLOSURE | note=descriptive only; not a selection
+fold,h,regime,fused_prod,fused_foldw,naive
+2,8,hiking,4.748092652785455,4.014513172261036,6.405257455613482
+2,13,hiking,5.583887013634054,7.025439987710984,7.4200954609419565
+5,8,cutting,7.609571360237239,7.000475669657642,10.116479577941597
+5,13,cutting,10.112207052501116,12.488985093796481,13.042857877471992

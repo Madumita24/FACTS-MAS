@@ -1,0 +1,20 @@
+# CONFIG: commit=3f99bae | Phase 5 | base B5 = {FA-ETS-d, seasonal w7, macro}, skill reference FA-ETS-d, R1c protocol (fix2 13 weeks, F0.10, adaptive Router, T=0.05) | TEST unless stated | CLEANBLEED primary | stats as Phase 4 (NW lag h-1, block L=13, B=5000)
+fold,h,T,lam
+1,4,0.05,0.0
+1,8,0.01,0.0
+1,13,0.1,0.0
+2,4,0.05,0.0
+2,8,0.1,0.0
+2,13,0.1,0.0
+3,4,0.01,0.0
+3,8,0.01,0.0
+3,13,0.05,0.0
+4,4,0.01,0.0
+4,8,0.01,0.0
+4,13,0.01,0.0
+5,4,0.01,0.0
+5,8,0.01,0.0
+5,13,0.01,0.0
+6,4,0.1,0.0
+6,8,0.1,0.0
+6,13,0.2,0.0

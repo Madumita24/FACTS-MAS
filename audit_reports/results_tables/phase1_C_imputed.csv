@@ -1,0 +1,8 @@
+# CONFIG: commit=ef28f47 | split=VALIDATION | folds=1-6 | msas=15 | horizons=4,8,13 | zillow=smoothed | fusion=adaptive T=0.05 104wk | rho_max=0.3 | note=test cells touching imputed = 0
+fold,val_cells,touching_imputed,naive_mape_zero_skipped,naive_zero_and_imputed
+1,4725,110,1,1
+2,4725,108,1,1
+3,4725,108,1,1
+4,4725,0,0,0
+5,4725,0,0,0
+6,4725,0,0,0

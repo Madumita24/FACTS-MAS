@@ -1,0 +1,21 @@
+# CONFIG: repo=FACTS-MAS commit=0a1aec5 (main HEAD, 2026-10-14) | split=TEST windows only (cache.cells(test_only=True)) | folds=1-6 | MSAs=15 | horizons=4,8,13 | cells per horizon=2610 (29 origins x 15 MSAs x 6 folds)
+# CONFIG: Zillow cut=smoothed (Metro_invt_fs_uc_sfrcondo_sm_week.csv) | metric=MAPE averaged over steps 1..H per cell, then unweighted mean over cells
+# CONFIG: fusion=adaptive (median pointwise skill vs naive, softmax T=0.05, 104-week validation window ending at train_end, fold-vs-regime mode chosen per fold x horizon on validation) | intrinsic rho_max=0.30 | event magnitude off
+# CONFIG: source "cache" = agent_output_cache.pkl (built_at 2026-08-12T03:32:06, matches current agent code on a 36-cell sample). source "july_pickle" = full_backtest_adaptive_fused_results.pkl (commit da77e8e, 2026-07-29, older agent code)
+# CONFIG: fold 6 includes 45 (8wk) and 120 (13wk) cells whose targets fall on or after 2026-01-01 (reserved window). Not excluded here, to match how the headline was produced.
+source,method,h4_mape,h8_mape,h13_mape,aggregation
+paper (Table 5),FACTS-MAS adaptive,2.243,5.038,7.020,as printed
+july_pickle,FACTS-MAS adaptive,2.243,5.038,7.020,origin-weighted mean of (fold;msa;h;regime) rows
+july_pickle,FACTS-MAS adaptive,2.344,5.258,7.244,unweighted mean of rows (not used by paper)
+july_pickle,naive,4.194,7.371,11.168,origin-weighted
+july_pickle,FACTS-MAS fold-level weights,2.243,5.121,9.641,origin-weighted
+july_pickle,FACTS-MAS adaptive_granular,2.243,4.902,7.645,origin-weighted
+cache,FACTS-MAS adaptive,2.094,4.973,6.855,cell mean
+cache,FACTS-MAS fold-level weights,2.094,4.527,8.281,cell mean
+cache,naive,4.194,7.371,11.168,cell mean
+cache,standalone temporal (ar),2.368,5.449,10.309,cell mean
+cache,standalone seasonal,2.971,4.809,6.828,cell mean
+cache,standalone exogenous (macro),4.258,7.448,11.283,cell mean
+cache,standalone event,4.194,7.371,11.168,cell mean
+cache,standalone intrinsic,8.244,9.221,11.942,cell mean
+cache,FACTS-MAS adaptive,2.172,5.123,6.894,unweighted mean of (fold;msa;h;regime) rows (not used by paper)

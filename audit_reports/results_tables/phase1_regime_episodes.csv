@@ -1,0 +1,14 @@
+# CONFIG: labels from agent_output_cache.pkl (classify_regime at origin, national fed funds 13-week change, +/-0.25) | validation window = origins in [train_end-104wk, train_end] | test = origins in [test_start, test_end] | episode = maximal run of consecutive weeks with one label
+fold,window,start,end,hiking_episodes,hiking_weeks,cutting_episodes,cutting_weeks,stable_episodes,stable_weeks,runs
+1,validation,2019-01-26,2021-01-23,1,2,2,44,3,59,hiking 2019-01-26..2019-02-02 (2w); stable 2019-02-09..2019-08-31 (30w); cutting 2019-09-07..2020-03-07 (27w); stable 2020-03-14..2020-04-04 (4w); cutting 2020-04-11..2020-08-01 (17w); stable 2020-08-08..2021-01-23 (25w)
+1,test,2021-05-01,2021-11-13,0,0,0,0,1,29,stable 2021-05-01..2021-11-13 (29w)
+2,validation,2019-11-16,2021-11-13,0,0,2,34,2,71,cutting 2019-11-16..2020-03-07 (17w); stable 2020-03-14..2020-04-04 (4w); cutting 2020-04-11..2020-08-01 (17w); stable 2020-08-08..2021-11-13 (67w)
+2,test,2022-02-19,2022-09-03,1,13,0,0,1,16,stable 2022-02-19..2022-06-04 (16w); hiking 2022-06-11..2022-09-03 (13w)
+3,validation,2020-09-05,2022-09-03,1,13,0,0,1,92,stable 2020-09-05..2022-06-04 (92w); hiking 2022-06-11..2022-09-03 (13w)
+3,test,2022-12-10,2023-06-24,1,29,0,0,0,0,hiking 2022-12-10..2023-06-24 (29w)
+4,validation,2021-06-26,2023-06-24,1,55,0,0,1,50,stable 2021-06-26..2022-06-04 (50w); hiking 2022-06-11..2023-06-24 (55w)
+4,test,2023-09-30,2024-04-13,1,1,0,0,1,28,hiking 2023-09-30..2023-09-30 (1w); stable 2023-10-07..2024-04-13 (28w)
+5,validation,2022-04-16,2024-04-13,1,69,0,0,2,36,stable 2022-04-16..2022-06-04 (8w); hiking 2022-06-11..2023-09-30 (69w); stable 2023-10-07..2024-04-13 (28w)
+5,test,2024-07-20,2025-02-01,0,0,1,13,1,16,stable 2024-07-20..2024-11-02 (16w); cutting 2024-11-09..2025-02-01 (13w)
+6,validation,2023-02-04,2025-02-01,1,35,1,13,1,57,hiking 2023-02-04..2023-09-30 (35w); stable 2023-10-07..2024-11-02 (57w); cutting 2024-11-09..2025-02-01 (13w)
+6,test,2025-05-10,2025-11-22,0,0,0,0,1,29,stable 2025-05-10..2025-11-22 (29w)

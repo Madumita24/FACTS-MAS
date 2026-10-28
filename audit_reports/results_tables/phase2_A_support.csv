@@ -1,0 +1,326 @@
+# CONFIG: commit=50df9b2 | baseline=R1 (seasonal w7 nested) | split=VALIDATION support counts | folds=1-6 | msas=15 | horizons=4,8,13 | zillow=smoothed | fusion=adaptive T=0.05 104wk (PROVISIONAL: T, Router, adaptive choice) | rho_max=0.3 | primary=CLEANBLEED
+config,fold,regime,h,support_weeks,n_points,fallback,mode
+R1,1,hiking,4,2,30,False,fold
+R1,1,hiking,8,2,30,False,regime
+R1,1,hiking,13,2,30,False,regime
+R1,1,cutting,4,44,660,False,fold
+R1,1,cutting,8,44,660,False,regime
+R1,1,cutting,13,44,660,False,regime
+R1,1,stable,4,59,884,False,fold
+R1,1,stable,8,59,885,False,regime
+R1,1,stable,13,59,885,False,regime
+R1,2,hiking,4,0,0,False,fold
+R1,2,hiking,8,0,0,False,regime
+R1,2,hiking,13,0,0,False,regime
+R1,2,cutting,4,34,510,False,fold
+R1,2,cutting,8,34,510,False,regime
+R1,2,cutting,13,34,510,False,regime
+R1,2,stable,4,71,1064,False,fold
+R1,2,stable,8,71,1065,False,regime
+R1,2,stable,13,71,1065,False,regime
+R1,3,hiking,4,13,195,False,fold
+R1,3,hiking,8,13,195,False,regime
+R1,3,hiking,13,13,195,False,regime
+R1,3,cutting,4,0,0,False,fold
+R1,3,cutting,8,0,0,False,regime
+R1,3,cutting,13,0,0,False,regime
+R1,3,stable,4,92,1379,False,fold
+R1,3,stable,8,92,1380,False,regime
+R1,3,stable,13,92,1380,False,regime
+R1,4,hiking,4,55,825,False,fold
+R1,4,hiking,8,55,825,False,fold
+R1,4,hiking,13,55,825,False,regime
+R1,4,cutting,4,0,0,False,fold
+R1,4,cutting,8,0,0,False,fold
+R1,4,cutting,13,0,0,False,regime
+R1,4,stable,4,50,750,False,fold
+R1,4,stable,8,50,750,False,fold
+R1,4,stable,13,50,750,False,regime
+R1,5,hiking,4,69,1035,False,fold
+R1,5,hiking,8,69,1035,False,regime
+R1,5,hiking,13,69,1035,False,regime
+R1,5,cutting,4,0,0,False,fold
+R1,5,cutting,8,0,0,False,regime
+R1,5,cutting,13,0,0,False,regime
+R1,5,stable,4,36,540,False,fold
+R1,5,stable,8,36,540,False,regime
+R1,5,stable,13,36,540,False,regime
+R1,6,hiking,4,35,525,False,fold
+R1,6,hiking,8,35,525,False,fold
+R1,6,hiking,13,35,525,False,regime
+R1,6,cutting,4,13,195,False,fold
+R1,6,cutting,8,13,195,False,fold
+R1,6,cutting,13,13,195,False,regime
+R1,6,stable,4,57,855,False,fold
+R1,6,stable,8,57,855,False,fold
+R1,6,stable,13,57,855,False,regime
+R1 + fix2,1,hiking,4,2,30,True,fold
+R1 + fix2,1,hiking,8,2,30,True,regime
+R1 + fix2,1,hiking,13,2,30,True,regime
+R1 + fix2,1,cutting,4,44,660,False,fold
+R1 + fix2,1,cutting,8,44,660,False,regime
+R1 + fix2,1,cutting,13,44,660,False,regime
+R1 + fix2,1,stable,4,59,884,False,fold
+R1 + fix2,1,stable,8,59,885,False,regime
+R1 + fix2,1,stable,13,59,885,False,regime
+R1 + fix2,2,hiking,4,0,0,True,fold
+R1 + fix2,2,hiking,8,0,0,True,regime
+R1 + fix2,2,hiking,13,0,0,True,regime
+R1 + fix2,2,cutting,4,34,510,False,fold
+R1 + fix2,2,cutting,8,34,510,False,regime
+R1 + fix2,2,cutting,13,34,510,False,regime
+R1 + fix2,2,stable,4,71,1064,False,fold
+R1 + fix2,2,stable,8,71,1065,False,regime
+R1 + fix2,2,stable,13,71,1065,False,regime
+R1 + fix2,3,hiking,4,13,195,False,fold
+R1 + fix2,3,hiking,8,13,195,False,regime
+R1 + fix2,3,hiking,13,13,195,False,regime
+R1 + fix2,3,cutting,4,0,0,True,fold
+R1 + fix2,3,cutting,8,0,0,True,regime
+R1 + fix2,3,cutting,13,0,0,True,regime
+R1 + fix2,3,stable,4,92,1379,False,fold
+R1 + fix2,3,stable,8,92,1380,False,regime
+R1 + fix2,3,stable,13,92,1380,False,regime
+R1 + fix2,4,hiking,4,55,825,False,fold
+R1 + fix2,4,hiking,8,55,825,False,fold
+R1 + fix2,4,hiking,13,55,825,False,regime
+R1 + fix2,4,cutting,4,0,0,True,fold
+R1 + fix2,4,cutting,8,0,0,True,fold
+R1 + fix2,4,cutting,13,0,0,True,regime
+R1 + fix2,4,stable,4,50,750,False,fold
+R1 + fix2,4,stable,8,50,750,False,fold
+R1 + fix2,4,stable,13,50,750,False,regime
+R1 + fix2,5,hiking,4,69,1035,False,fold
+R1 + fix2,5,hiking,8,69,1035,False,regime
+R1 + fix2,5,hiking,13,69,1035,False,regime
+R1 + fix2,5,cutting,4,0,0,True,fold
+R1 + fix2,5,cutting,8,0,0,True,regime
+R1 + fix2,5,cutting,13,0,0,True,regime
+R1 + fix2,5,stable,4,36,540,False,fold
+R1 + fix2,5,stable,8,36,540,False,regime
+R1 + fix2,5,stable,13,36,540,False,regime
+R1 + fix2,6,hiking,4,35,525,False,fold
+R1 + fix2,6,hiking,8,35,525,False,fold
+R1 + fix2,6,hiking,13,35,525,False,regime
+R1 + fix2,6,cutting,4,13,195,False,fold
+R1 + fix2,6,cutting,8,13,195,False,fold
+R1 + fix2,6,cutting,13,13,195,False,regime
+R1 + fix2,6,stable,4,57,855,False,fold
+R1 + fix2,6,stable,8,57,855,False,fold
+R1 + fix2,6,stable,13,57,855,False,regime
+R1 + F0.10,1,hiking,4,2,30,False,fold
+R1 + F0.10,1,hiking,8,2,30,False,regime
+R1 + F0.10,1,hiking,13,2,30,False,regime
+R1 + F0.10,1,cutting,4,44,660,False,fold
+R1 + F0.10,1,cutting,8,44,660,False,regime
+R1 + F0.10,1,cutting,13,44,660,False,regime
+R1 + F0.10,1,stable,4,55,825,False,fold
+R1 + F0.10,1,stable,8,51,765,False,regime
+R1 + F0.10,1,stable,13,46,690,False,regime
+R1 + F0.10,2,hiking,4,0,0,False,fold
+R1 + F0.10,2,hiking,8,0,0,False,regime
+R1 + F0.10,2,hiking,13,0,0,False,regime
+R1 + F0.10,2,cutting,4,34,510,False,fold
+R1 + F0.10,2,cutting,8,34,510,False,regime
+R1 + F0.10,2,cutting,13,34,510,False,regime
+R1 + F0.10,2,stable,4,67,1004,False,fold
+R1 + F0.10,2,stable,8,63,945,False,regime
+R1 + F0.10,2,stable,13,58,870,False,regime
+R1 + F0.10,3,hiking,4,9,135,False,fold
+R1 + F0.10,3,hiking,8,5,75,False,regime
+R1 + F0.10,3,hiking,13,0,0,False,regime
+R1 + F0.10,3,cutting,4,0,0,False,fold
+R1 + F0.10,3,cutting,8,0,0,False,regime
+R1 + F0.10,3,cutting,13,0,0,False,regime
+R1 + F0.10,3,stable,4,92,1379,False,fold
+R1 + F0.10,3,stable,8,92,1380,False,regime
+R1 + F0.10,3,stable,13,92,1380,False,regime
+R1 + F0.10,4,hiking,4,51,765,False,fold
+R1 + F0.10,4,hiking,8,47,705,False,fold
+R1 + F0.10,4,hiking,13,42,630,False,regime
+R1 + F0.10,4,cutting,4,0,0,False,fold
+R1 + F0.10,4,cutting,8,0,0,False,fold
+R1 + F0.10,4,cutting,13,0,0,False,regime
+R1 + F0.10,4,stable,4,50,750,False,fold
+R1 + F0.10,4,stable,8,50,750,False,fold
+R1 + F0.10,4,stable,13,50,750,False,regime
+R1 + F0.10,5,hiking,4,69,1035,False,fold
+R1 + F0.10,5,hiking,8,69,1035,False,regime
+R1 + F0.10,5,hiking,13,69,1035,False,regime
+R1 + F0.10,5,cutting,4,0,0,False,fold
+R1 + F0.10,5,cutting,8,0,0,False,regime
+R1 + F0.10,5,cutting,13,0,0,False,regime
+R1 + F0.10,5,stable,4,32,480,False,fold
+R1 + F0.10,5,stable,8,28,420,False,regime
+R1 + F0.10,5,stable,13,23,345,False,regime
+R1 + F0.10,6,hiking,4,35,525,False,fold
+R1 + F0.10,6,hiking,8,35,525,False,fold
+R1 + F0.10,6,hiking,13,35,525,False,regime
+R1 + F0.10,6,cutting,4,9,135,False,fold
+R1 + F0.10,6,cutting,8,5,75,False,fold
+R1 + F0.10,6,cutting,13,0,0,False,regime
+R1 + F0.10,6,stable,4,57,855,False,fold
+R1 + F0.10,6,stable,8,57,855,False,fold
+R1 + F0.10,6,stable,13,57,855,False,regime
+R1 + fix2 + F0.10 (combined),1,hiking,4,2,30,True,fold
+R1 + fix2 + F0.10 (combined),1,hiking,8,2,30,True,regime
+R1 + fix2 + F0.10 (combined),1,hiking,13,2,30,True,regime
+R1 + fix2 + F0.10 (combined),1,cutting,4,44,660,False,fold
+R1 + fix2 + F0.10 (combined),1,cutting,8,44,660,False,regime
+R1 + fix2 + F0.10 (combined),1,cutting,13,44,660,False,regime
+R1 + fix2 + F0.10 (combined),1,stable,4,55,825,False,fold
+R1 + fix2 + F0.10 (combined),1,stable,8,51,765,False,regime
+R1 + fix2 + F0.10 (combined),1,stable,13,46,690,False,regime
+R1 + fix2 + F0.10 (combined),2,hiking,4,0,0,True,fold
+R1 + fix2 + F0.10 (combined),2,hiking,8,0,0,True,regime
+R1 + fix2 + F0.10 (combined),2,hiking,13,0,0,True,regime
+R1 + fix2 + F0.10 (combined),2,cutting,4,34,510,False,fold
+R1 + fix2 + F0.10 (combined),2,cutting,8,34,510,False,regime
+R1 + fix2 + F0.10 (combined),2,cutting,13,34,510,False,regime
+R1 + fix2 + F0.10 (combined),2,stable,4,67,1004,False,fold
+R1 + fix2 + F0.10 (combined),2,stable,8,63,945,False,regime
+R1 + fix2 + F0.10 (combined),2,stable,13,58,870,False,regime
+R1 + fix2 + F0.10 (combined),3,hiking,4,9,135,True,fold
+R1 + fix2 + F0.10 (combined),3,hiking,8,5,75,True,regime
+R1 + fix2 + F0.10 (combined),3,hiking,13,0,0,True,regime
+R1 + fix2 + F0.10 (combined),3,cutting,4,0,0,True,fold
+R1 + fix2 + F0.10 (combined),3,cutting,8,0,0,True,regime
+R1 + fix2 + F0.10 (combined),3,cutting,13,0,0,True,regime
+R1 + fix2 + F0.10 (combined),3,stable,4,92,1379,False,fold
+R1 + fix2 + F0.10 (combined),3,stable,8,92,1380,False,regime
+R1 + fix2 + F0.10 (combined),3,stable,13,92,1380,False,regime
+R1 + fix2 + F0.10 (combined),4,hiking,4,51,765,False,fold
+R1 + fix2 + F0.10 (combined),4,hiking,8,47,705,False,fold
+R1 + fix2 + F0.10 (combined),4,hiking,13,42,630,False,regime
+R1 + fix2 + F0.10 (combined),4,cutting,4,0,0,True,fold
+R1 + fix2 + F0.10 (combined),4,cutting,8,0,0,True,fold
+R1 + fix2 + F0.10 (combined),4,cutting,13,0,0,True,regime
+R1 + fix2 + F0.10 (combined),4,stable,4,50,750,False,fold
+R1 + fix2 + F0.10 (combined),4,stable,8,50,750,False,fold
+R1 + fix2 + F0.10 (combined),4,stable,13,50,750,False,regime
+R1 + fix2 + F0.10 (combined),5,hiking,4,69,1035,False,fold
+R1 + fix2 + F0.10 (combined),5,hiking,8,69,1035,False,regime
+R1 + fix2 + F0.10 (combined),5,hiking,13,69,1035,False,regime
+R1 + fix2 + F0.10 (combined),5,cutting,4,0,0,True,fold
+R1 + fix2 + F0.10 (combined),5,cutting,8,0,0,True,regime
+R1 + fix2 + F0.10 (combined),5,cutting,13,0,0,True,regime
+R1 + fix2 + F0.10 (combined),5,stable,4,32,480,False,fold
+R1 + fix2 + F0.10 (combined),5,stable,8,28,420,False,regime
+R1 + fix2 + F0.10 (combined),5,stable,13,23,345,False,regime
+R1 + fix2 + F0.10 (combined),6,hiking,4,35,525,False,fold
+R1 + fix2 + F0.10 (combined),6,hiking,8,35,525,False,fold
+R1 + fix2 + F0.10 (combined),6,hiking,13,35,525,False,regime
+R1 + fix2 + F0.10 (combined),6,cutting,4,9,135,True,fold
+R1 + fix2 + F0.10 (combined),6,cutting,8,5,75,True,fold
+R1 + fix2 + F0.10 (combined),6,cutting,13,0,0,True,regime
+R1 + fix2 + F0.10 (combined),6,stable,4,57,855,False,fold
+R1 + fix2 + F0.10 (combined),6,stable,8,57,855,False,fold
+R1 + fix2 + F0.10 (combined),6,stable,13,57,855,False,regime
+"DISCLOSURE sens: combined, threshold 4",1,hiking,4,2,30,True,fold
+"DISCLOSURE sens: combined, threshold 4",1,hiking,8,2,30,True,regime
+"DISCLOSURE sens: combined, threshold 4",1,hiking,13,2,30,True,regime
+"DISCLOSURE sens: combined, threshold 4",1,cutting,4,44,660,False,fold
+"DISCLOSURE sens: combined, threshold 4",1,cutting,8,44,660,False,regime
+"DISCLOSURE sens: combined, threshold 4",1,cutting,13,44,660,False,regime
+"DISCLOSURE sens: combined, threshold 4",1,stable,4,55,825,False,fold
+"DISCLOSURE sens: combined, threshold 4",1,stable,8,51,765,False,regime
+"DISCLOSURE sens: combined, threshold 4",1,stable,13,46,690,False,regime
+"DISCLOSURE sens: combined, threshold 4",2,hiking,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 4",2,hiking,8,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",2,hiking,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",2,cutting,4,34,510,False,fold
+"DISCLOSURE sens: combined, threshold 4",2,cutting,8,34,510,False,regime
+"DISCLOSURE sens: combined, threshold 4",2,cutting,13,34,510,False,regime
+"DISCLOSURE sens: combined, threshold 4",2,stable,4,67,1004,False,fold
+"DISCLOSURE sens: combined, threshold 4",2,stable,8,63,945,False,regime
+"DISCLOSURE sens: combined, threshold 4",2,stable,13,58,870,False,regime
+"DISCLOSURE sens: combined, threshold 4",3,hiking,4,9,135,False,fold
+"DISCLOSURE sens: combined, threshold 4",3,hiking,8,5,75,False,regime
+"DISCLOSURE sens: combined, threshold 4",3,hiking,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",3,cutting,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 4",3,cutting,8,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",3,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",3,stable,4,92,1379,False,fold
+"DISCLOSURE sens: combined, threshold 4",3,stable,8,92,1380,False,regime
+"DISCLOSURE sens: combined, threshold 4",3,stable,13,92,1380,False,regime
+"DISCLOSURE sens: combined, threshold 4",4,hiking,4,51,765,False,fold
+"DISCLOSURE sens: combined, threshold 4",4,hiking,8,47,705,False,fold
+"DISCLOSURE sens: combined, threshold 4",4,hiking,13,42,630,False,regime
+"DISCLOSURE sens: combined, threshold 4",4,cutting,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 4",4,cutting,8,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 4",4,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",4,stable,4,50,750,False,fold
+"DISCLOSURE sens: combined, threshold 4",4,stable,8,50,750,False,fold
+"DISCLOSURE sens: combined, threshold 4",4,stable,13,50,750,False,regime
+"DISCLOSURE sens: combined, threshold 4",5,hiking,4,69,1035,False,fold
+"DISCLOSURE sens: combined, threshold 4",5,hiking,8,69,1035,False,regime
+"DISCLOSURE sens: combined, threshold 4",5,hiking,13,69,1035,False,regime
+"DISCLOSURE sens: combined, threshold 4",5,cutting,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 4",5,cutting,8,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",5,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",5,stable,4,32,480,False,fold
+"DISCLOSURE sens: combined, threshold 4",5,stable,8,28,420,False,regime
+"DISCLOSURE sens: combined, threshold 4",5,stable,13,23,345,False,regime
+"DISCLOSURE sens: combined, threshold 4",6,hiking,4,35,525,False,fold
+"DISCLOSURE sens: combined, threshold 4",6,hiking,8,35,525,False,fold
+"DISCLOSURE sens: combined, threshold 4",6,hiking,13,35,525,False,regime
+"DISCLOSURE sens: combined, threshold 4",6,cutting,4,9,135,False,fold
+"DISCLOSURE sens: combined, threshold 4",6,cutting,8,5,75,False,fold
+"DISCLOSURE sens: combined, threshold 4",6,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 4",6,stable,4,57,855,False,fold
+"DISCLOSURE sens: combined, threshold 4",6,stable,8,57,855,False,fold
+"DISCLOSURE sens: combined, threshold 4",6,stable,13,57,855,False,regime
+"DISCLOSURE sens: combined, threshold 26",1,hiking,4,2,30,True,fold
+"DISCLOSURE sens: combined, threshold 26",1,hiking,8,2,30,True,regime
+"DISCLOSURE sens: combined, threshold 26",1,hiking,13,2,30,True,regime
+"DISCLOSURE sens: combined, threshold 26",1,cutting,4,44,660,False,fold
+"DISCLOSURE sens: combined, threshold 26",1,cutting,8,44,660,False,regime
+"DISCLOSURE sens: combined, threshold 26",1,cutting,13,44,660,False,regime
+"DISCLOSURE sens: combined, threshold 26",1,stable,4,55,825,False,fold
+"DISCLOSURE sens: combined, threshold 26",1,stable,8,51,765,False,regime
+"DISCLOSURE sens: combined, threshold 26",1,stable,13,46,690,False,regime
+"DISCLOSURE sens: combined, threshold 26",2,hiking,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 26",2,hiking,8,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",2,hiking,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",2,cutting,4,34,510,False,fold
+"DISCLOSURE sens: combined, threshold 26",2,cutting,8,34,510,False,regime
+"DISCLOSURE sens: combined, threshold 26",2,cutting,13,34,510,False,regime
+"DISCLOSURE sens: combined, threshold 26",2,stable,4,67,1004,False,fold
+"DISCLOSURE sens: combined, threshold 26",2,stable,8,63,945,False,regime
+"DISCLOSURE sens: combined, threshold 26",2,stable,13,58,870,False,regime
+"DISCLOSURE sens: combined, threshold 26",3,hiking,4,9,135,True,fold
+"DISCLOSURE sens: combined, threshold 26",3,hiking,8,5,75,True,regime
+"DISCLOSURE sens: combined, threshold 26",3,hiking,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",3,cutting,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 26",3,cutting,8,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",3,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",3,stable,4,92,1379,False,fold
+"DISCLOSURE sens: combined, threshold 26",3,stable,8,92,1380,False,regime
+"DISCLOSURE sens: combined, threshold 26",3,stable,13,92,1380,False,regime
+"DISCLOSURE sens: combined, threshold 26",4,hiking,4,51,765,False,fold
+"DISCLOSURE sens: combined, threshold 26",4,hiking,8,47,705,False,fold
+"DISCLOSURE sens: combined, threshold 26",4,hiking,13,42,630,False,regime
+"DISCLOSURE sens: combined, threshold 26",4,cutting,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 26",4,cutting,8,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 26",4,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",4,stable,4,50,750,False,fold
+"DISCLOSURE sens: combined, threshold 26",4,stable,8,50,750,False,fold
+"DISCLOSURE sens: combined, threshold 26",4,stable,13,50,750,False,regime
+"DISCLOSURE sens: combined, threshold 26",5,hiking,4,69,1035,False,fold
+"DISCLOSURE sens: combined, threshold 26",5,hiking,8,69,1035,False,regime
+"DISCLOSURE sens: combined, threshold 26",5,hiking,13,69,1035,False,regime
+"DISCLOSURE sens: combined, threshold 26",5,cutting,4,0,0,True,fold
+"DISCLOSURE sens: combined, threshold 26",5,cutting,8,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",5,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",5,stable,4,32,480,False,fold
+"DISCLOSURE sens: combined, threshold 26",5,stable,8,28,420,False,regime
+"DISCLOSURE sens: combined, threshold 26",5,stable,13,23,345,True,regime
+"DISCLOSURE sens: combined, threshold 26",6,hiking,4,35,525,False,fold
+"DISCLOSURE sens: combined, threshold 26",6,hiking,8,35,525,False,fold
+"DISCLOSURE sens: combined, threshold 26",6,hiking,13,35,525,False,regime
+"DISCLOSURE sens: combined, threshold 26",6,cutting,4,9,135,True,fold
+"DISCLOSURE sens: combined, threshold 26",6,cutting,8,5,75,True,fold
+"DISCLOSURE sens: combined, threshold 26",6,cutting,13,0,0,True,regime
+"DISCLOSURE sens: combined, threshold 26",6,stable,4,57,855,False,fold
+"DISCLOSURE sens: combined, threshold 26",6,stable,8,57,855,False,fold
+"DISCLOSURE sens: combined, threshold 26",6,stable,13,57,855,False,regime

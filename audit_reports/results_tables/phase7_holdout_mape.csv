@@ -1,0 +1,14 @@
+# CONFIG: Phase 7 HOLDOUT | frozen P (FINAL_CONFIG, frozen a27a23a; runner sha256 06dee8fd...) | one fold: train_end 2026-02-21, origins 2026-02-28..2026-09-12, data to 2026-10-10 (archive_20261020b) | 15 MSAs | MAPE per cell over steps 1..H | stats: panel DM NW lag h-1; block bootstrap whole weeks B=5000 seed 20261016, L=h or floor(T/2) (flagged); equivalence margin 2% of FA-ETS-d | 13wk descriptive (FINAL_CONFIG 11.1) | CoT gpt-5.6-luna (11.4), smoothed only | TimesFM 2.5 | lag = publication lag on inventory (weeks)
+cut,lag,h,n_cells,P,B5,fa_ets_d,naive,snaive,naive2,timesfm,cot
+smoothed,0,4,435,1.243,1.1379,1.138,3.1222,8.5337,1.492,1.4103,1.2589
+smoothed,0,8,375,1.929,1.9353,1.9357,5.4451,8.5343,2.3771,2.6022,2.2249
+smoothed,0,13,300,3.0453,3.0757,3.0802,8.4384,8.5501,3.3932,4.4568,3.2678
+smoothed,2,4,435,2.27,2.0149,2.0154,5.4745,8.5337,2.4644,2.717,2.2628
+smoothed,2,8,375,2.9436,2.9662,2.9673,7.953,8.5343,3.3503,4.1952,3.3199
+smoothed,2,13,300,4.0002,4.0438,4.0484,11.1104,8.5501,4.2943,6.2476,4.2207
+raw,0,4,435,2.0527,2.0263,2.0284,3.3548,8.593,2.0531,2.4638,
+raw,0,8,375,2.6712,2.6618,2.7094,5.3064,8.6011,2.6774,3.6887,
+raw,0,13,300,3.6443,3.6111,3.7359,7.9255,8.6225,3.5635,5.355,
+raw,2,4,435,2.7864,2.7337,2.7464,5.5333,8.593,2.7864,3.8664,
+raw,2,8,375,3.5132,3.5009,3.5738,7.6843,8.6011,3.5145,5.3188,
+raw,2,13,300,4.3916,4.3609,4.5021,10.4706,8.6225,4.3087,6.9493,
